@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>miRNA 3'UTR Mapper – Binding Site Analysis Tool</title>
+    <meta name="description"
+        content="Interactive map of miRNA binding sites on the 3'UTR of any human gene. Data from Ensembl REST API and miRDB." />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <div class="progress-track" id="progress-track"></div>
+    <div class="tooltip" id="tooltip"></div>
+
+    <!-- HEADER -->
+    <header>
+        <div class="header-inner">
+            <div class="logo">
+                <div class="logo-icon">🧬</div>
+                <div class="logo-text">
+                    <h1>miRNA 3'UTR Mapper</h1>
+                    <span>Binding site analysis · Ensembl + miRDB</span>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge badge-blue">Ensembl REST</span>
+                <span class="badge badge-purple">miRDB v5</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main>
+
+        <!-- SEARCH HERO -->
+        <div class="search-section">
+            <div class="search-hero">
+                <h2>Map miRNA sites on the 3'UTR</h2>
+                <p>Enter a gene symbol to visualize predicted microRNA binding sites</p>
+            </div>
+
+            <div class="search-box">
+                <div class="input-group" style="flex:2">
+                    <label for="gene-input">Gene Symbol</label>
+                    <input type="text" id="gene-input" placeholder="e.g. ABCB11, ATP8B1, TP53…" autocomplete="off"
+                        autocapitalize="characters" spellcheck="false" />
+                    <div class="search-suggestions" id="suggestions"></div>
+                </div>
+                <div class="input-group">
+                    <label for="species-select">Species</label>
+                    <select id="species-select">
+                        <option value="homo_sapiens">Homo sapiens</option>
+                        <option value="mus_musculus">Mus musculus</option>
+                        <option value="rattus_norvegicus">Rattus norvegicus</option>
+                        <option value="danio_rerio">Danio rerio</option>
+                    </select>
+                </div>
+                <button class="btn-search" id="btn-search">🔬 Analyze</button>
+            </div>
+        </div>
+
+        <!-- STATUS BAR -->
+        <div class="status-bar" id="status-bar"></div>
+
+        <!-- GENE INFO CARD -->
+        <div class="gene-info-card" id="gene-info-card"></div>
+
+        <!-- TRANSCRIPT SELECTOR -->
+        <div class="transcript-bar" id="transcript-bar">
+            <label for="transcript-select">📋 Transcript:</label>
+            <select id="transcript-select"></select>
+            <button class="btn-icon" id="btn-export" title="Export CSV">⬇ Export CSV</button>
+        </div>
+
+        <!-- CONTENT GRID -->
+        <div class="content-grid">
+
+            <!-- LEFT: MAP + TABLE -->
+            <div>
+
+                <!-- UTR MAP PANEL -->
+                <div class="map-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span class="dot dot-blue"></span>
+                            3'UTR Map – miRNA Binding Sites
+                        </div>
+                        <div class="panel-controls">
+                            <button class="btn-icon" onclick="if(state.filteredTargets.length) renderUTRMap()"
+                                title="Redraw map">↻</button>
+                        </div>
+                    </div>
+
+                    <div class="utr-map-container">
+                        <!-- Loading overlay for map -->
+                        <div class="loading-overlay" id="loading-map">
+                            <div class="spinner"></div>
+                            <span class="loading-text">Loading map…</span>
+                        </div>
+
+                        <svg id="utr-svg" aria-label="Interactive 3'UTR map">
+                            <!-- Empty state inside SVG -->
+                        </svg>
+
+                        <!-- Empty state (shown before search) -->
+                        <div class="empty-state" id="map-empty">
+                            <span class="big-icon">🧩</span>
+                            <h3>No gene selected</h3>
+                            <p>Search for a gene to display the miRNA binding site map on the 3'UTR.</p>
+                        </div>
+                    </div>
+
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:#ff7b72"></div> 8mer (high affinity)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:#f0883e"></div> 7mer
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:#58a6ff"></div> 6mer
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background:#484f58; border-radius:50%"></div>
+                            ◆ = click for details
+                        </div>
+                    </div>
+                </div><!-- /map-panel -->
+
+                <!-- TABLE PANEL -->
+                <div class="table-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <span class="dot dot-purple"></span>
+                            Predicted miRNA Targets
+                        </div>
+                    </div>
+
+                    <div class="table-filters">
+                        <span class="filter-chip active" data-filter="all">All</span>
+                        <span class="filter-chip" data-filter="8mer">8mer</span>
+                        <span class="filter-chip" data-filter="7mer">7mer</span>
+                        <span class="filter-chip" data-filter="6mer">6mer</span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <div class="loading-overlay" id="loading-table"
+                            style="position:relative;border-radius:8px;min-height:60px">
+                            <div class="spinner"></div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-col="mirna">miRNA</th>
+                                    <th data-col="score" class="sorted">Score ▼</th>
+                                    <th data-col="position">Position</th>
+                                    <th data-col="seed">Seed</th>
+                                    <th data-col="family">Family</th>
+                                    <th>Links</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <tr>
+                                    <td colspan="6" style="text-align:center;padding:3rem;color:var(--text-muted)">
+                                        Search for a gene to display miRNA targets.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div><!-- /table-panel -->
+
+            </div><!-- /left col -->
+
+            <!-- RIGHT: DETAIL PANEL -->
+            <div class="detail-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="dot dot-green"></span>
+                        Site Details
+                    </div>
+                </div>
+
+                <div class="detail-empty" id="detail-empty">
+                    <span class="icon">🎯</span>
+                    <p>Select a miRNA from the map or the table to view binding site details.</p>
+                </div>
+
+                <div class="detail-content" id="detail-content">
+                    <!-- populated by JS -->
+                </div>
+            </div>
+
+        </div><!-- /content-grid -->
+
+    </main><!-- /main -->
+
+    <script src="app.js"></script>
+    <script>
+        // Hide map empty state when svg has content
+        const mapEmptyEl = document.getElementById('map-empty');
+        const origRenderUTRMap = renderUTRMap;
+        window.renderUTRMap = function () {
+            origRenderUTRMap();
+            if (state.filteredTargets.length > 0) {
+                mapEmptyEl.style.display = 'none';
+            } else {
+                mapEmptyEl.style.display = '';
+            }
+        };
+
+        // Also hide on reset
+        const origResetUI = resetUI;
+        window.resetUI = function () {
+            origResetUI();
+            mapEmptyEl.style.display = '';
+        };
+    </script>
+</body>
+
+</html>

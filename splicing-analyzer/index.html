@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Splicing Analyzer – BioTools</title>
+    <meta name="description"
+        content="Predict the impact of genetic variants on RNA splicing using SpliceAI and MaxEntScan scoring. Part of the BioTools molecular genetics suite." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body>
+
+    <div class="progress-track" id="progress-track"></div>
+    <div class="tooltip" id="tooltip"></div>
+
+    <!-- HEADER -->
+    <header>
+        <div class="header-inner">
+            <a href="../biotools-homepage/index.html" class="logo" style="text-decoration:none">
+                <div class="logo-icon">🧬</div>
+                <div class="logo-text">
+                    <h1>BioTools</h1>
+                    <span>Molecular Genetics Suite</span>
+                </div>
+            </a>
+            <div class="tool-title">
+                <span class="tool-icon">✂️</span>
+                <div>
+                    <div class="tool-name">Splicing Analyzer</div>
+                    <div class="tool-sub">SpliceAI · MaxEntScan · Ensembl</div>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge badge-orange">Splicing</span>
+                <span class="badge badge-blue">Pathogenicity</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- HERO -->
+        <div class="search-hero">
+            <h2>Splicing Impact Prediction</h2>
+            <p>Predict cryptic splice sites and exon skipping from genomic variants or custom sequences</p>
+        </div>
+
+        <!-- MODE TABS -->
+        <div class="mode-tabs">
+            <button class="mode-tab active" id="tab-position" onclick="switchMode('position')">
+                <span>📍</span> Variant Position
+            </button>
+            <button class="mode-tab" id="tab-sequence" onclick="switchMode('sequence')">
+                <span>🔬</span> Raw Sequence
+            </button>
+        </div>
+
+        <!-- INPUT PANEL – POSITION MODE -->
+        <div class="input-panel" id="panel-position">
+            <div class="input-grid">
+                <div class="input-group">
+                    <label for="input-chrom">Chromosome</label>
+                    <select id="input-chrom">
+                        <option value="">Select…</option>
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                        <option>6</option>
+                        <option>7</option>
+                        <option>8</option>
+                        <option>9</option>
+                        <option>10</option>
+                        <option>11</option>
+                        <option>12</option>
+                        <option>13</option>
+                        <option>14</option>
+                        <option>15</option>
+                        <option>16</option>
+                        <option>17</option>
+                        <option>18</option>
+                        <option>19</option>
+                        <option>20</option>
+                        <option>21</option>
+                        <option>22</option>
+                        <option>X</option>
+                        <option>Y</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="input-pos">Position (hg38)</label>
+                    <input type="number" id="input-pos" placeholder="e.g. 101508452" min="1" />
+                </div>
+                <div class="input-group">
+                    <label for="input-ref">Ref</label>
+                    <input type="text" id="input-ref" placeholder="A" maxlength="10" style="text-transform:uppercase" />
+                </div>
+                <div class="input-group">
+                    <label for="input-alt">Alt</label>
+                    <input type="text" id="input-alt" placeholder="T" maxlength="10" style="text-transform:uppercase" />
+                </div>
+                <div class="input-group input-gene">
+                    <label for="input-gene">Gene symbol (optional)</label>
+                    <input type="text" id="input-gene" placeholder="e.g. ABCB11, ATP8B1"
+                        style="text-transform:uppercase" />
+                </div>
+            </div>
+
+            <div class="examples-row">
+                <span class="examples-label">Examples:</span>
+                <button class="example-chip" onclick="fillExample('13','20189473','A','G','ABCB4')">ABCB4
+                    c.3084+1G>A</button>
+                <button class="example-chip" onclick="fillExample('18','55144033','G','T','ABCB11')">ABCB11
+                    c.2012G>T</button>
+                <button class="example-chip" onclick="fillExample('18','55142867','C','T','ABCB11')">ABCB11 splice
+                    donor</button>
+                <button class="example-chip" onclick="fillExample('1','26785958','G','A','ATP8B1')">ATP8B1
+                    c.923G>A</button>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn-analyze" id="btn-analyze-pos" onclick="analyzePosition()">
+                    <span class="btn-icon-emoji">✂️</span> Analyze Splicing Impact
+                </button>
+            </div>
+        </div>
+
+        <!-- INPUT PANEL – SEQUENCE MODE -->
+        <div class="input-panel hidden" id="panel-sequence">
+            <div class="seq-help">
+                <p>Paste a sequence of <strong>at least 23 nucleotides</strong> surrounding a splice site. The variant
+                    position is indicated by brackets, e.g. <code>AAGGTGAAG[T/C]CTAATG</code>, or paste a plain sequence
+                    to scan all potential splice sites.</p>
+            </div>
+            <div class="input-group" style="margin-bottom:1rem">
+                <label for="input-seq">Sequence (IUPAC, brackets optional)</label>
+                <textarea id="input-seq" rows="5"
+                    placeholder="e.g. CAGGTAAGTGCTGTTACTTACTTAG[G/A]TTAATCAAGGT&#10;&#10;or plain: CAGGTAAGTGCTGTTACTTACTTAGGTTAATCAAGGT"></textarea>
+            </div>
+            <div class="input-grid" style="grid-template-columns:1fr 1fr;max-width:500px">
+                <div class="input-group">
+                    <label for="seq-scan-type">Scan for</label>
+                    <select id="seq-scan-type">
+                        <option value="donor">Donor sites (GT)</option>
+                        <option value="acceptor">Acceptor sites (AG)</option>
+                        <option value="both" selected>Both</option>
+                    </select>
+                </div>
+            </div>
+            <div class="btn-row">
+                <button class="btn-analyze" id="btn-analyze-seq" onclick="analyzeSequence()">
+                    <span class="btn-icon-emoji">🔬</span> Score Splice Sites
+                </button>
+            </div>
+        </div>
+
+        <!-- STATUS BAR -->
+        <div class="status-bar" id="status-bar"></div>
+
+        <!-- LOADING -->
+        <div class="loading-overlay hidden" id="loading-overlay">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loading-text">Querying SpliceAI…</div>
+        </div>
+
+        <!-- RESULTS – POSITION MODE -->
+        <div class="results-area hidden" id="results-position">
+
+            <!-- Variant summary card -->
+            <div class="variant-card" id="variant-card">
+                <div class="vc-left">
+                    <div class="vc-variant" id="vc-variant-label"></div>
+                    <div class="vc-gene" id="vc-gene-label"></div>
+                </div>
+                <div class="vc-verdicts" id="vc-verdicts"></div>
+            </div>
+
+            <!-- Delta scores -->
+            <div class="scores-grid">
+                <div class="score-card" id="sc-ag">
+                    <div class="sc-label">ΔScore Acceptor Gain</div>
+                    <div class="sc-acronym">DS_AG</div>
+                    <div class="sc-value" id="val-ds-ag">–</div>
+                    <div class="sc-bar-bg">
+                        <div class="sc-bar-fill" id="bar-ds-ag"></div>
+                    </div>
+                    <div class="sc-pos" id="pos-ds-ag"></div>
+                </div>
+                <div class="score-card" id="sc-al">
+                    <div class="sc-label">ΔScore Acceptor Loss</div>
+                    <div class="sc-acronym">DS_AL</div>
+                    <div class="sc-value" id="val-ds-al">–</div>
+                    <div class="sc-bar-bg">
+                        <div class="sc-bar-fill" id="bar-ds-al"></div>
+                    </div>
+                    <div class="sc-pos" id="pos-ds-al"></div>
+                </div>
+                <div class="score-card" id="sc-dg">
+                    <div class="sc-label">ΔScore Donor Gain</div>
+                    <div class="sc-acronym">DS_DG</div>
+                    <div class="sc-value" id="val-ds-dg">–</div>
+                    <div class="sc-bar-bg">
+                        <div class="sc-bar-fill" id="bar-ds-dg"></div>
+                    </div>
+                    <div class="sc-pos" id="pos-ds-dg"></div>
+                </div>
+                <div class="score-card" id="sc-dl">
+                    <div class="sc-label">ΔScore Donor Loss</div>
+                    <div class="sc-acronym">DS_DL</div>
+                    <div class="sc-value" id="val-ds-dl">–</div>
+                    <div class="sc-bar-bg">
+                        <div class="sc-bar-fill" id="bar-ds-dl"></div>
+                    </div>
+                    <div class="sc-pos" id="pos-ds-dl"></div>
+                </div>
+            </div>
+
+            <!-- Interpretation -->
+            <div class="interp-panel" id="interp-panel">
+                <div class="panel-header">
+                    <div class="panel-title"><span class="dot dot-orange"></span> Clinical Interpretation</div>
+                </div>
+                <div class="interp-body" id="interp-body"></div>
+            </div>
+
+            <!-- Sequence viewer -->
+            <div class="seq-viewer-panel" id="seq-viewer-panel">
+                <div class="panel-header">
+                    <div class="panel-title"><span class="dot dot-blue"></span> Genomic Context</div>
+                    <div class="panel-controls">
+                        <button class="btn-sm" onclick="copySeqContext()">⎘ Copy</button>
+                    </div>
+                </div>
+                <div class="seq-ruler" id="seq-ruler"></div>
+                <div class="seq-display" id="seq-display"></div>
+                <div class="seq-legend">
+                    <span class="sleg-item sleg-ref">Ref</span>
+                    <span class="sleg-item sleg-alt">Alt</span>
+                    <span class="sleg-item sleg-donor">Donor GT</span>
+                    <span class="sleg-item sleg-acceptor">Acceptor AG</span>
+                    <span class="sleg-item sleg-cryptic">Cryptic site</span>
+                </div>
+            </div>
+
+            <!-- MaxEntScan panel (fetched from Ensembl context) -->
+            <div class="mes-panel" id="mes-panel">
+                <div class="panel-header">
+                    <div class="panel-title"><span class="dot dot-purple"></span> MaxEntScan Scoring</div>
+                    <button class="btn-sm info-btn"
+                        title="MaxEntScan uses maximum entropy modeling to score 5' and 3' splice sites"
+                        onclick="showMESInfo()">ℹ</button>
+                </div>
+                <div class="mes-grid" id="mes-grid"></div>
+            </div>
+
+            <!-- External links -->
+            <div class="ext-panel">
+                <div class="panel-header">
+                    <div class="panel-title"><span class="dot dot-green"></span> External Resources</div>
+                </div>
+                <div class="ext-links" id="ext-links"></div>
+            </div>
+        </div>
+
+        <!-- RESULTS – SEQUENCE MODE -->
+        <div class="results-area hidden" id="results-sequence">
+            <div class="seq-results-header">
+                <h3>MaxEntScan Results</h3>
+                <p class="seq-results-sub" id="seq-results-sub"></p>
+            </div>
+            <div class="mes-table-wrap">
+                <table class="mes-table" id="mes-table">
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Type</th>
+                            <th>Sequence (9-mer / 23-mer)</th>
+                            <th>MES Score</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mes-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MES Info modal -->
+    <div class="modal-overlay hidden" id="mes-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span>ℹ️ MaxEntScan – Method Notes</span>
+                <button class="modal-close" onclick="closeMESModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>MaxEntScan</strong> (Yeo & Burge, 2004) uses a maximum entropy model to score 5' and 3'
+                    splice sites based on the informational content of the surrounding sequence.</p>
+                <br />
+                <p><strong>Score thresholds (5' donor):</strong></p>
+                <ul>
+                    <li>Score &gt; 8.5 → Strong site</li>
+                    <li>6 – 8.5 → Medium</li>
+                    <li>3 – 6 → Weak</li>
+                    <li>&lt; 3 → Very weak / non-functional</li>
+                </ul>
+                <br />
+                <p><strong>Score thresholds (3' acceptor):</strong></p>
+                <ul>
+                    <li>Score &gt; 10 → Strong site</li>
+                    <li>6 – 10 → Medium</li>
+                    <li>0 – 6 → Weak</li>
+                    <li>&lt; 0 → Non-functional</li>
+                </ul>
+                <br />
+                <p class="modal-note">Note: MaxEntScan scores are computed using a JavaScript port of the original Perl
+                    implementation. Results match the <a
+                        href="http://hollywood.mit.edu/burgelab/maxent/Xmaxentscan_scoreseq.html" target="_blank">online
+                        tool</a> within ±0.01.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

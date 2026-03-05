@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BioTools – Bioinformatics Tools for Molecular Genetics</title>
+    <meta name="description"
+        content="Open source bioinformatics tools for molecular genetics research: miRNA analysis, dPCR, rare genetic diseases and variant interpretation." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #070d19;
+            --bg2: #0d1628;
+            --bg3: #111d33;
+            --card: #0f1c35;
+            --border: rgba(56, 80, 130, 0.35);
+            --border-glow: rgba(88, 166, 255, 0.25);
+            --accent: #58a6ff;
+            --accent2: #bc8cff;
+            --accent3: #3fb950;
+            --accent4: #f0883e;
+            --red: #ff7b72;
+            --text: #e6edf3;
+            --text2: #8b949e;
+            --text3: #3d4450;
+            --grad1: linear-gradient(135deg, #1f6feb, #8957e5);
+            --grad2: linear-gradient(135deg, #0d419d, #3d1a78);
+            --grad3: linear-gradient(135deg, #0d6640, #1a5c3a);
+            --grad4: linear-gradient(135deg, #9e4e12, #6e2f0f);
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            --glow-blue: 0 0 40px rgba(88, 166, 255, 0.12);
+            --glow-purple: 0 0 40px rgba(188, 140, 255, 0.12);
+            --r: 18px;
+            --rm: 12px;
+            --rs: 8px;
+            --tr: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6
+        }
+
+        /* ── ANIMATED BG ── */
+        .bg-orbs {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: orbFloat 12s ease-in-out infinite
+        }
+
+        .orb1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(31, 111, 235, 0.12), transparent 70%);
+            top: -200px;
+            left: -200px;
+            animation-delay: 0s
+        }
+
+        .orb2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(137, 87, 229, 0.1), transparent 70%);
+            bottom: -150px;
+            right: -150px;
+            animation-delay: -4s
+        }
+
+        .orb3 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(63, 185, 80, 0.06), transparent 70%);
+            top: 40%;
+            left: 60%;
+            animation-delay: -8s
+        }
+
+        @keyframes orbFloat {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1)
+            }
+
+            33% {
+                transform: translate(30px, -20px) scale(1.05)
+            }
+
+            66% {
+                transform: translate(-20px, 30px) scale(0.95)
+            }
+        }
+
+        /* ── NOISE texture overlay ── */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: .4
+        }
+
+        /* ── LAYOUT ── */
+        .wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: .9rem 2rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            background: rgba(7, 13, 25, 0.8)
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            text-decoration: none
+        }
+
+        .nav-logo-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: var(--grad1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 0 16px rgba(88, 166, 255, 0.3)
+        }
+
+        .nav-logo-text {
+            font-size: 1rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 1.5rem;
+            align-items: center
+        }
+
+        .nav-links a {
+            color: var(--text2);
+            text-decoration: none;
+            font-size: .875rem;
+            font-weight: 500;
+            transition: color var(--tr)
+        }
+
+        .nav-links a:hover {
+            color: var(--text)
+        }
+
+        .nav-btn {
+            padding: .45rem 1.1rem;
+            background: rgba(88, 166, 255, 0.12);
+            border: 1px solid rgba(88, 166, 255, 0.3);
+            border-radius: 20px;
+            color: var(--accent);
+            font-size: .82rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all var(--tr)
+        }
+
+        .nav-btn:hover {
+            background: rgba(88, 166, 255, 0.2);
+            color: var(--accent) !important
+        }
+
+        /* ── HERO ── */
+        .hero {
+            padding: 160px 0 80px;
+            text-align: center
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .35rem 1rem;
+            background: rgba(88, 166, 255, 0.08);
+            border: 1px solid rgba(88, 166, 255, 0.2);
+            border-radius: 20px;
+            font-size: .78rem;
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.8rem
+        }
+
+        .hero-eyebrow span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent3);
+            box-shadow: 0 0 6px var(--accent3);
+            animation: pulse 2s ease-in-out infinite
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1)
+            }
+
+            50% {
+                opacity: .6;
+                transform: scale(.8)
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.4rem, 6vw, 4.2rem);
+            font-weight: 800;
+            line-height: 1.12;
+            letter-spacing: -1.5px;
+            margin-bottom: 1.5rem
+        }
+
+        .hero h1 .line1 {
+            display: block;
+            color: var(--text)
+        }
+
+        .hero h1 .line2 {
+            display: block;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 50%, var(--accent3) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .hero-sub {
+            font-size: 1.1rem;
+            color: var(--text2);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap
+        }
+
+        .btn-primary {
+            padding: .85rem 2rem;
+            background: var(--grad1);
+            border: none;
+            border-radius: var(--rs);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: .95rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            transition: all var(--tr);
+            box-shadow: 0 4px 20px rgba(31, 111, 235, 0.35)
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(31, 111, 235, 0.5)
+        }
+
+        .btn-outline {
+            padding: .85rem 2rem;
+            background: transparent;
+            border: 1px solid var(--border-glow);
+            border-radius: var(--rs);
+            color: var(--text2);
+            font-family: 'Inter', sans-serif;
+            font-size: .95rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            transition: all var(--tr)
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(88, 166, 255, 0.06)
+        }
+
+        /* ── STATS BAR ── */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            padding: 2rem 0 3.5rem;
+            flex-wrap: wrap
+        }
+
+        .stat {
+            text-align: center
+        }
+
+        .stat-num {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, var(--text), var(--text2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .stat-label {
+            font-size: .78rem;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            margin-top: .25rem
+        }
+
+        /* ── SECTION TITLE ── */
+        section {
+            padding: 5rem 0
+        }
+
+        .section-label {
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: .8rem
+        }
+
+        .section-title {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: 1rem
+        }
+
+        .section-sub {
+            color: var(--text2);
+            font-size: 1rem;
+            max-width: 550px;
+            line-height: 1.7
+        }
+
+        /* ── TOOLS GRID ── */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem
+        }
+
+        /* ── TOOL CARD ── */
+        .tool-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all var(--tr);
+            position: relative
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--r);
+            opacity: 0;
+            transition: opacity var(--tr);
+            pointer-events: none
+        }
+
+        .tool-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-4px);
+            box-shadow: var(--glow-blue)
+        }
+
+        .tool-card.purple:hover {
+            box-shadow: var(--glow-purple)
+        }
+
+        .card-header {
+            padding: 1.8rem 1.8rem 1.4rem;
+            position: relative
+        }
+
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+            position: relative
+        }
+
+        .card-icon-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: .6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--card)
+        }
+
+        .badge-live {
+            background: var(--accent3);
+            color: #000;
+            font-weight: 700
+        }
+
+        .badge-soon {
+            background: var(--accent4);
+            color: #000;
+            font-weight: 700
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: .5rem
+        }
+
+        .card-desc {
+            font-size: .88rem;
+            color: var(--text2);
+            line-height: 1.65;
+            margin-bottom: 1.2rem
+        }
+
+        .card-tags {
+            display: flex;
+            gap: .4rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem
+        }
+
+        .tag {
+            padding: .2rem .6rem;
+            border-radius: 20px;
+            font-size: .68rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: .3px
+        }
+
+        .tag-blue {
+            background: rgba(88, 166, 255, 0.12);
+            color: var(--accent);
+            border: 1px solid rgba(88, 166, 255, 0.25)
+        }
+
+        .tag-purple {
+            background: rgba(188, 140, 255, 0.12);
+            color: var(--accent2);
+            border: 1px solid rgba(188, 140, 255, 0.25)
+        }
+
+        .tag-green {
+            background: rgba(63, 185, 80, 0.12);
+            color: var(--accent3);
+            border: 1px solid rgba(63, 185, 80, 0.25)
+        }
+
+        .tag-orange {
+            background: rgba(240, 136, 62, 0.12);
+            color: var(--accent4);
+            border: 1px solid rgba(240, 136, 62, 0.25)
+        }
+
+        .card-features {
+            padding: 0 1.8rem 1.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: .6rem;
+            flex: 1
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            font-size: .83rem;
+            color: var(--text2)
+        }
+
+        .feature .fi {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .65rem;
+            flex-shrink: 0
+        }
+
+        .fi-green {
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--accent3)
+        }
+
+        .fi-blue {
+            background: rgba(88, 166, 255, 0.15);
+            color: var(--accent)
+        }
+
+        .card-footer {
+            padding: 1.2rem 1.8rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: .75rem;
+            align-items: center
+        }
+
+        .card-link {
+            flex: 1;
+            padding: .65rem 1.2rem;
+            border-radius: var(--rs);
+            font-size: .85rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: all var(--tr);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem
+        }
+
+        .card-link-primary {
+            background: var(--grad1);
+            color: white;
+            box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3)
+        }
+
+        .card-link-primary:hover {
+            box-shadow: 0 6px 20px rgba(31, 111, 235, 0.5);
+            transform: translateY(-1px)
+        }
+
+        .card-link-primary.purple-btn {
+            background: var(--grad2)
+        }
+
+        .card-link-primary.purple-btn:hover {
+            box-shadow: 0 6px 20px rgba(137, 87, 229, 0.5)
+        }
+
+        .card-link-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text2)
+        }
+
+        .card-link-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(88, 166, 255, 0.06)
+        }
+
+        .card-status {
+            font-size: .72rem;
+            font-weight: 600;
+            padding: .3rem .7rem;
+            border-radius: 20px
+        }
+
+        .status-live {
+            background: rgba(63, 185, 80, 0.12);
+            color: var(--accent3);
+            border: 1px solid rgba(63, 185, 80, 0.25)
+        }
+
+        .status-soon {
+            background: rgba(240, 136, 62, 0.12);
+            color: var(--accent4);
+            border: 1px solid rgba(240, 136, 62, 0.25)
+        }
+
+        /* ── CARD GRADIENT TOPS ── */
+        .card-top-strip {
+            height: 3px;
+            width: 100%
+        }
+
+        .strip-blue {
+            background: linear-gradient(90deg, var(--accent), var(--accent2))
+        }
+
+        .strip-green {
+            background: linear-gradient(90deg, var(--accent3), var(--accent))
+        }
+
+        .strip-orange {
+            background: linear-gradient(90deg, var(--accent4), var(--red))
+        }
+
+        /* ── ABOUT SECTION ── */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            margin-top: 3rem
+        }
+
+        @media(max-width:768px) {
+            .about-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .about-text p {
+            color: var(--text2);
+            font-size: .95rem;
+            line-height: 1.8;
+            margin-bottom: 1rem
+        }
+
+        .about-text strong {
+            color: var(--text)
+        }
+
+        .about-card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem
+        }
+
+        .about-item {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start
+        }
+
+        .about-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            margin-top: .1rem
+        }
+
+        .about-item-text strong {
+            display: block;
+            font-size: .9rem;
+            margin-bottom: .2rem;
+            color: var(--text)
+        }
+
+        .about-item-text span {
+            font-size: .82rem;
+            color: var(--text2)
+        }
+
+        /* ── TIMELINE / ROADMAP ── */
+        .roadmap {
+            margin-top: 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem
+        }
+
+        .roadmap-item {
+            display: flex;
+            gap: 1.2rem;
+            align-items: flex-start;
+            padding: 1.1rem 1.4rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--rm);
+            transition: all var(--tr)
+        }
+
+        .roadmap-item:hover {
+            border-color: var(--border-glow)
+        }
+
+        .roadmap-item.done {
+            border-left: 3px solid var(--accent3)
+        }
+
+        .roadmap-item.active {
+            border-left: 3px solid var(--accent)
+        }
+
+        .roadmap-item.planned {
+            border-left: 3px solid var(--text3)
+        }
+
+        .roadmap-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: .35rem
+        }
+
+        .roadmap-item.done .roadmap-dot {
+            background: var(--accent3)
+        }
+
+        .roadmap-item.active .roadmap-dot {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+            animation: pulse 2s infinite
+        }
+
+        .roadmap-item.planned .roadmap-dot {
+            background: var(--text3)
+        }
+
+        .roadmap-info strong {
+            font-size: .9rem;
+            display: block;
+            margin-bottom: .2rem
+        }
+
+        .roadmap-info span {
+            font-size: .8rem;
+            color: var(--text2)
+        }
+
+        .roadmap-badge {
+            margin-left: auto;
+            font-size: .7rem;
+            font-weight: 600;
+            padding: .2rem .6rem;
+            border-radius: 20px;
+            white-space: nowrap;
+            align-self: center
+        }
+
+        /* ── CONTACT / FOOTER ── */
+        .footer-section {
+            padding: 4rem 0 2rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem
+        }
+
+        .footer-inner {
+            display: flex;
+            gap: 3rem;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem
+        }
+
+        .footer-brand .brand-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: .4rem
+        }
+
+        .footer-brand p {
+            font-size: .82rem;
+            color: var(--text2);
+            max-width: 260px;
+            line-height: 1.7
+        }
+
+        .footer-links-group {
+            display: flex;
+            flex-direction: column;
+            gap: .5rem
+        }
+
+        .footer-links-group h4 {
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            color: var(--text3);
+            margin-bottom: .3rem
+        }
+
+        .footer-links-group a {
+            font-size: .85rem;
+            color: var(--text2);
+            text-decoration: none;
+            transition: color var(--tr)
+        }
+
+        .footer-links-group a:hover {
+            color: var(--accent)
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: .5rem
+        }
+
+        .footer-bottom p {
+            font-size: .78rem;
+            color: var(--text3)
+        }
+
+        .footer-bottom a {
+            color: var(--text2);
+            text-decoration: none;
+            font-size: .78rem;
+            transition: color var(--tr)
+        }
+
+        .footer-bottom a:hover {
+            color: var(--accent)
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 0
+        }
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:640px) {
+            .stats-bar {
+                gap: 1.5rem
+            }
+
+            .hero {
+                padding: 120px 0 60px
+            }
+
+            .nav-links {
+                gap: .75rem
+            }
+
+            .nav-links a:not(.nav-btn) {
+                display: none
+            }
+
+            .footer-inner {
+                gap: 1.5rem
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Animated background orbs -->
+    <div class="bg-orbs">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+        <div class="orb orb3"></div>
+    </div>
+
+    <!-- NAV -->
+    <nav>
+        <div class="nav-inner">
+            <a href="#" class="nav-logo">
+                <div class="nav-logo-icon">🧬</div>
+                <span class="nav-logo-text">BioTools Lab</span>
+            </a>
+            <div class="nav-links">
+                <a href="#tools">Tools</a>
+                <a href="#about">About</a>
+                <a href="#roadmap">Roadmap</a>
+                <a href="https://github.com" target="_blank" class="nav-btn">⬡ GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="wrap">
+            <div class="hero-eyebrow">
+                <span></span>
+                Open source tools · Molecular Genetics
+            </div>
+            <h1>
+                <span class="line1">Bioinformatics for</span>
+                <span class="line2">Clinical Genetic Research</span>
+            </h1>
+            <p class="hero-sub">
+                Interactive tools for the analysis of genetic variants, miRNA, dPCR and rare diseases.
+                Designed by a molecular biologist geneticist, for researchers.
+            </p>
+            <div class="hero-cta">
+                <a href="#tools" class="btn-primary">🔬 Explore tools</a>
+                <a href="https://github.com" target="_blank" class="btn-outline">⬡ Source code</a>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat">
+                    <div class="stat-num">5</div>
+                    <div class="stat-label">Active tools</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">100%</div>
+                    <div class="stat-label">Open Source</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">0€</div>
+                    <div class="stat-label">Cost to use</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- TOOLS SECTION -->
+    <section id="tools">
+        <div class="wrap">
+            <div class="section-label">Available tools</div>
+            <div class="section-title">Analyze. Visualize. Discover.</div>
+            <p class="section-sub">Each tool is designed to solve a specific problem in molecular genetics and rare
+                disease research.</p>
+
+            <div class="tools-grid">
+
+                <!-- CARD 1: miRNA Mapper -->
+                <div class="tool-card">
+                    <div class="card-top-strip strip-blue"></div>
+                    <div class="card-header">
+                        <div class="card-icon"
+                            style="background:linear-gradient(135deg,rgba(31,111,235,0.2),rgba(137,87,229,0.2));border:1px solid rgba(88,166,255,0.2)">
+                            🧬
+                            <span class="card-icon-badge badge-live">✓</span>
+                        </div>
+                        <div class="card-title">miRNA 3'UTR Mapper</div>
+                        <p class="card-desc">Interactive map of miRNA binding sites on the 3'UTR of any gene. Searches
+                            directly in Ensembl and miRDB. Ideal for post-transcriptional analysis and target
+                            validation.</p>
+                        <div class="card-tags">
+                            <span class="tag tag-blue">Ensembl REST</span>
+                            <span class="tag tag-purple">miRDB v5</span>
+                            <span class="tag tag-green">Interactive SVG</span>
+                            <span class="tag tag-blue">Export CSV</span>
+                        </div>
+                    </div>
+                    <div class="card-features">
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>Gene symbol search (e.g. ABCB11, TP53)
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>3'UTR map with colour-coded markers by seed type
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>Prediction score, position, miRNA family
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>8mer / 7mer / 6mer filters and column sorting
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-blue">↗</div>Direct link to miRBase and RNAhybrid
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="../mirna-utr-mapper/index.html" class="card-link card-link-primary">↗ Open tool</a>
+                        <a href="https://github.com" target="_blank" class="card-link card-link-secondary">⬡ Code</a>
+                        <span class="card-status status-live">● Live</span>
+                    </div>
+                </div>
+
+                <!-- CARD 2: dPCR Analyzer -->
+                <div class="tool-card purple">
+                    <div class="card-top-strip strip-green"></div>
+                    <div class="card-header">
+                        <div class="card-icon"
+                            style="background:linear-gradient(135deg,rgba(63,185,80,0.15),rgba(31,111,235,0.15));border:1px solid rgba(63,185,80,0.2)">
+                            🔬
+                            <span class="card-icon-badge badge-live">✓</span>
+                        </div>
+                        <div class="card-title">dPCR Analyzer</div>
+                        <p class="card-desc">Automated analysis and visualisation of digital PCR results from QIAcuity.
+                            PDF data extraction, concentration calculation, charts and reports. Supports CNV and rare
+                            mutation experiments.</p>
+                        <div class="card-tags">
+                            <span class="tag tag-green">R / Shiny</span>
+                            <span class="tag tag-blue">PDF Parser</span>
+                            <span class="tag tag-orange">QIAcuity</span>
+                            <span class="tag tag-green">CNV Analysis</span>
+                        </div>
+                    </div>
+                    <div class="card-features">
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>Automatic QIAcuity PDF parsing (v2 and v3)
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>Concentration calculation copies/µL with 95% CI
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>Interactive charts for each sample
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>Data export in CSV and automatic report
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-blue">↗</div>Also available on GitHub
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="https://github.com" target="_blank" class="card-link card-link-primary purple-btn">⬡
+                            Download from GitHub</a>
+                        <a href="https://shinyapps.io" target="_blank" class="card-link card-link-secondary">▶ Demo</a>
+                        <span class="card-status status-live">● Live</span>
+                    </div>
+                </div>
+
+                <!-- CARD 3: Variant Analyzer -->
+                <div class="tool-card">
+                    <div class="card-top-strip" style="background:linear-gradient(90deg,#f0883e,#ff7b72)"></div>
+                    <div class="card-header">
+                        <div class="card-icon"
+                            style="background:linear-gradient(135deg,rgba(240,136,62,0.15),rgba(255,123,114,0.15));border:1px solid rgba(240,136,62,0.2)">
+                            🧩
+                            <span class="card-icon-badge badge-live">✓</span>
+                        </div>
+                        <div class="card-title">Variant Analyzer</div>
+                        <p class="card-desc">Complete analysis of genetic variants with integrated in silico predictors.
+                            Supports SNV/Missense, Splicing and Indel. Automatic PubMed literature search and
+                            integration with ClinVar, gnomAD, COSMIC.</p>
+                        <div class="card-tags">
+                            <span class="tag tag-orange">FastAPI + Python</span>
+                            <span class="tag tag-purple">SpliceAI · CADD</span>
+                            <span class="tag tag-blue">PubMed · ClinVar</span>
+                            <span class="tag tag-green">gnomAD · COSMIC</span>
+                        </div>
+                    </div>
+                    <div class="card-features">
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>SIFT, PolyPhen-2, REVEL, CADD for missense variants
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>SpliceAI and MaxEntScan for splicing variants
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>Automatic literature search on PubMed
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>ClinVar, gnomAD, COSMIC integration
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-blue">↗</div>Documented REST API (Swagger UI)
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="http://localhost:8000" target="_blank" class="card-link card-link-primary"
+                            style="background:linear-gradient(135deg,#9e4e12,#7a3a0d)">↗ Open tool</a>
+                        <a href="https://github.com" target="_blank" class="card-link card-link-secondary">⬡ Code</a>
+                        <span class="card-status status-live">● Live</span>
+                    </div>
+                </div>
+
+                <!-- CARD 4: Splicing Analyzer -->
+                <div class="tool-card">
+                    <div class="card-top-strip" style="background:linear-gradient(90deg,#d29922,#f0883e)"></div>
+                    <div class="card-header">
+                        <div class="card-icon"
+                            style="background:linear-gradient(135deg,rgba(210,153,34,0.15),rgba(240,136,62,0.12));border:1px solid rgba(210,153,34,0.25)">
+                            ✂️
+                            <span class="card-icon-badge badge-live">✓</span>
+                        </div>
+                        <div class="card-title">Splicing Analyzer</div>
+                        <p class="card-desc">Predict splicing impact of genetic variants using SpliceAI deep learning
+                            scores and MaxEntScan. Dual input: genomic position (hg38) or raw sequence scan.
+                            With Ensembl context viewer and clinical interpretation.</p>
+                        <div class="card-tags">
+                            <span class="tag tag-orange">SpliceAI (Broad)</span>
+                            <span class="tag tag-purple">MaxEntScan</span>
+                            <span class="tag tag-blue">Ensembl REST</span>
+                            <span class="tag tag-green">hg38</span>
+                        </div>
+                    </div>
+                    <div class="card-features">
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>SpliceAI ΔScores: DS_AG, DS_AL, DS_DG, DS_DL
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>MaxEntScan 5' donor &amp; 3' acceptor scoring
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>Genomic sequence context viewer (Ensembl)
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>Clinical interpretation (pathogenic thresholds)
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-blue">↗</div>Links to SpliceAI Lookup, VarSome, OMIM
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="../splicing-analyzer/index.html" class="card-link card-link-primary"
+                            style="background:linear-gradient(135deg,#a37118,#c4620a)">✂️ Open tool</a>
+                        <a href="https://github.com" target="_blank" class="card-link card-link-secondary">⬡ Code</a>
+                        <span class="card-status status-live">● Live</span>
+                    </div>
+                </div>
+
+
+                <!-- CARD 5: SV Analyzer -->
+                <div class="tool-card">
+                    <div class="card-top-strip" style="background:linear-gradient(90deg,#0d9488,#2dd4bf)"></div>
+                    <div class="card-header">
+                        <div class="card-icon"
+                            style="background:linear-gradient(135deg,rgba(13,148,136,0.15),rgba(45,212,191,0.12));border:1px solid rgba(45,212,191,0.25)">
+                            &#x1F500;
+                            <span class="card-icon-badge badge-live">&#10003;</span>
+                        </div>
+                        <div class="card-title">SV Analyzer</div>
+                        <p class="card-desc">Structural variant analysis for WGS Long Reads. Visualize DEL, DUP, INV, INS and BND with
+                            Ensembl gene overlap, ACMG-like classification and links to DECIPHER, DGV and gnomAD-SV.</p>
+                        <div class="card-tags">
+                            <span class="tag tag-green">Sniffles2 &#183; PBSV</span>
+                            <span class="tag tag-blue">Ensembl REST</span>
+                            <span class="tag tag-purple">DECIPHER &#183; DGV</span>
+                            <span class="tag tag-orange">gnomAD-SV</span>
+                        </div>
+                    </div>
+                    <div class="card-features">
+                        <div class="feature">
+                            <div class="fi fi-green">&#10003;</div>DEL, DUP, INV, INS, BND support
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">&#10003;</div>VCF paste (Sniffles2 / PBSV / Manta / SVABA)
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">&#10003;</div>Ensembl gene overlap with biotype
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">&#10003;</div>ACMG-like score (size + type + gene impact)
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-blue">&#8599;</div>DECIPHER, DGV, gnomAD-SV, ClinVar links
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="../sv-analyzer/index.html" class="card-link card-link-primary"
+                            style="background:linear-gradient(135deg,#0d9488,#2563eb)">&#x1F500; Open tool</a>
+                        <a href="https://github.com" target="_blank" class="card-link card-link-secondary">&#x2B21; Code</a>
+                        <span class="card-status status-live">&#9679; Live</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ABOUT SECTION -->
+    <section id="about">
+        <div class="wrap">
+            <div class="section-label">About me</div>
+            <div class="about-grid">
+                <div class="about-text">
+                    <div class="section-title" style="font-size:2rem">Molecular Biologist<br>Geneticist</div>
+                    <p>I work on the study and analysis of genetic variants in both <strong>Mendelian
+                            (monogenic) disorders</strong> and <strong>multifactorial diseases</strong>, where
+                        pathogenesis arises from the interplay between an individual's genetic background and
+                        environmental triggers.
+                    </p>
+                    <p>My work spans <strong>Whole Exome Sequencing (WES)</strong> and <strong>Whole Genome Sequencing
+                            with Long Reads (ONT / PacBio)</strong>: from DNA extraction and sample preparation,
+                        through data analysis with Relational Databases, to the identification and confirmation of
+                        variants of interest in rare disease patients. Long-read WGS enables detection of structural
+                        variants, repeat expansions and complex rearrangements not resolvable by short-read approaches.
+                    </p>
+                    <p>I developed these tools to automate and improve the analysis workflow, making them freely
+                        available to the scientific community.</p>
+                    <p>All tools are <strong>open source</strong>, freely usable for research and education, and welcome
+                        community contributions.</p>
+                    <a href="mailto:your@email.com" class="btn-outline" style="margin-top:1rem;width:fit-content">✉
+                        Contact me</a>
+                </div>
+                <div class="about-card">
+                    <div class="about-item">
+                        <span class="about-icon">🔬</span>
+                        <div class="about-item-text">
+                            <strong>Molecular Genetics</strong>
+                            <span>Variant identification, WES/WGS, trio analysis</span>
+                        </div>
+                    </div>
+                    <div class="about-item">
+                        <span class="about-icon">🧬</span>
+                        <div class="about-item-text">
+                            <strong>Rare Diseases</strong>
+                            <span>IFC, neonatal cholestasis, genetic liver diseases</span>
+                        </div>
+                    </div>
+                    <div class="about-item">
+                        <span class="about-icon">💊</span>
+                        <div class="about-item-text">
+                            <strong>dPCR &amp; Diagnostics</strong>
+                            <span>Allele-specific quantification, CNV, mosaicism</span>
+                        </div>
+                    </div>
+                    <div class="about-item">
+                        <span class="about-icon">🤖</span>
+                        <div class="about-item-text">
+                            <strong>Applied Bioinformatics</strong>
+                            <span>Development of Python, R, JavaScript tools for research</span>
+                        </div>
+                    </div>
+                    <div class="about-item">
+                        <span class="about-icon">🗄️</span>
+                        <div class="about-item-text">
+                            <strong>SQL Variant Filtering (PostgreSQL / pgAdmin)</strong>
+                            <span>Custom queries on annotated VCF databases for dominant, recessive, de novo, X-linked
+                                and compound heterozygous inheritance — single cases, trios and multi-individual
+                                families</span>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ROADMAP -->
+    <section id="roadmap">
+        <div class="wrap">
+            <div class="section-label">Roadmap</div>
+            <div class="section-title">What we are building</div>
+            <p class="section-sub">Upcoming tools in development, in order of priority.</p>
+            <div class="roadmap">
+                <div class="roadmap-item done">
+                    <div class="roadmap-dot"></div>
+                    <div class="roadmap-info">
+                        <strong>miRNA 3'UTR Mapper</strong>
+                        <span>Interactive binding site map for any human gene's 3'UTR</span>
+                    </div>
+                    <span class="roadmap-badge status-live">✓ Completed</span>
+                </div>
+                <div class="roadmap-item done">
+                    <div class="roadmap-dot"></div>
+                    <div class="roadmap-info">
+                        <strong>dPCR Analyzer v1.0</strong>
+                        <span>Automatic analysis of QIAcuity results, concentration calculation and reports</span>
+                    </div>
+                    <span class="roadmap-badge status-live">✓ Completed</span>
+                </div>
+                <div class="roadmap-item done">
+                    <div class="roadmap-dot"></div>
+                    <div class="roadmap-info">
+                        <strong>Variant Analyzer</strong>
+                        <span>In silico predictors (SIFT, PolyPhen-2, SpliceAI, CADD), PubMed, ClinVar, gnomAD</span>
+                    </div>
+                    <span class="roadmap-badge status-live">✓ Completed</span>
+                </div>
+                <div class="roadmap-item done">
+                    <div class="roadmap-dot"></div>
+                    <div class="roadmap-info">
+                        <strong>Splicing Analyzer</strong>
+                        <span>SpliceAI ΔScores + MaxEntScan 5'/3' scoring + Ensembl context viewer — dual input mode</span>
+                    </div>
+                    <span class="roadmap-badge status-live">✓ Completed</span>
+                </div>
+                <div class="roadmap-item done">
+                    <div class="roadmap-dot"></div>
+                    <div class="roadmap-info">
+                        <strong>SV Analyzer</strong>
+                        <span>Structural variant analysis for WGS Long Reads — DEL, DUP, INV, INS, BND with Ensembl gene overlap</span>
+                    </div>
+                    <span class="roadmap-badge status-live">✓ Completed</span>
+                </div>
+                
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="wrap footer-section">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <div class="brand-title">🧬 BioTools Lab</div>
+                    <p>Open source bioinformatics tools for molecular genetics and rare disease research.</p>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Tools</h4>
+                    <a href="../mirna-utr-mapper/index.html">miRNA 3'UTR Mapper</a>
+                    <a href="https://github.com">dPCR Analyzer</a>
+                    <a href="http://localhost:8000">Variant Analyzer</a>
+                    <a href="../splicing-analyzer/index.html">Splicing Analyzer</a>
+                    <a href="../sv-analyzer/index.html">SV Analyzer</a>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Resources</h4>
+                    <a href="https://www.ensembl.org" target="_blank">Ensembl</a>
+                    <a href="https://mirdb.org" target="_blank">miRDB</a>
+                    <a href="https://www.mirbase.org" target="_blank">miRBase</a>
+                    <a href="https://www.omim.org" target="_blank">OMIM</a>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Contact</h4>
+                    <a href="mailto:your@email.com">✉ Email</a>
+                    <a href="https://github.com" target="_blank">⬡ GitHub</a>
+                    <a href="https://orcid.org" target="_blank">ORCID</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 BioTools Lab · All tools released under the MIT licence</p>
+                <p style="font-size:.72rem;color:var(--text3);margin-top:.3rem">
+                    Data sourced from <a href="https://www.ensembl.org" target="_blank"
+                        style="color:var(--text3)">Ensembl (EMBL-EBI)</a>,
+                    <a href="https://mirdb.org" target="_blank" style="color:var(--text3)">miRDB</a>,
+                    <a href="https://www.mirbase.org" target="_blank" style="color:var(--text3)">miRBase</a>,
+                    <a href="https://www.ncbi.nlm.nih.gov/clinvar/" target="_blank" style="color:var(--text3)">ClinVar
+                        (NCBI)</a> and
+                    <a href="https://gnomad.broadinstitute.org" target="_blank" style="color:var(--text3)">gnomAD (Broad
+                        Institute)</a> —
+                    all publicly available under their respective open-access licences.
+                </p>
+                <div style="display:flex;gap:1.2rem">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                    <a href="https://github.com" target="_blank">Contribute ↗</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

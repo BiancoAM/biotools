@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SV Analyzer – BioTools</title>
+    <meta name="description"
+        content="Structural Variant analysis tool for WGS long-read data. Visualize DEL, DUP, INV, INS, BND with gene overlap, ACMG-like classification and links to DECIPHER, DGV and gnomAD-SV." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body>
+
+    <div class="progress-track" id="progress-track"></div>
+    <div class="tooltip" id="tooltip"></div>
+
+    <!-- HEADER -->
+    <header>
+        <div class="header-inner">
+            <a href="../biotools-homepage/index.html" class="logo" style="text-decoration:none">
+                <div class="logo-icon">🧬</div>
+                <div class="logo-text">
+                    <h1>BioTools</h1>
+                    <span>Molecular Genetics Suite</span>
+                </div>
+            </a>
+            <div class="tool-title">
+                <span class="tool-icon">🔀</span>
+                <div>
+                    <div class="tool-name">SV Analyzer</div>
+                    <div class="tool-sub">Structural Variants · WGS Long Reads · Ensembl · DECIPHER</div>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge badge-teal">Structural Variants</span>
+                <span class="badge badge-purple">Long Reads</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- HERO -->
+        <div class="search-hero">
+            <h2>Structural Variant Analysis</h2>
+            <p>Classify and visualize SVs from WGS Long Reads (Sniffles2 · PBSV · Manta · SVABA)</p>
+        </div>
+
+        <!-- MODE TABS -->
+        <div class="mode-tabs">
+            <button class="mode-tab active" id="tab-manual" onclick="switchMode('manual')">
+                <span>✏️</span> Manual Entry
+            </button>
+            <button class="mode-tab" id="tab-vcf" onclick="switchMode('vcf')">
+                <span>📄</span> VCF Paste
+            </button>
+        </div>
+
+        <!-- MANUAL INPUT -->
+        <div class="input-panel" id="panel-manual">
+            <div class="input-grid-sv">
+                <div class="input-group">
+                    <label for="sv-chrom">Chromosome</label>
+                    <select id="sv-chrom">
+                        <option value="">Select…</option>
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                        <option>6</option>
+                        <option>7</option>
+                        <option>8</option>
+                        <option>9</option>
+                        <option>10</option>
+                        <option>11</option>
+                        <option>12</option>
+                        <option>13</option>
+                        <option>14</option>
+                        <option>15</option>
+                        <option>16</option>
+                        <option>17</option>
+                        <option>18</option>
+                        <option>19</option>
+                        <option>20</option>
+                        <option>21</option>
+                        <option>22</option>
+                        <option>X</option>
+                        <option>Y</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="sv-start">Start (hg38)</label>
+                    <input type="number" id="sv-start" placeholder="e.g. 55100000" min="1" />
+                </div>
+                <div class="input-group">
+                    <label for="sv-end">End (hg38)</label>
+                    <input type="number" id="sv-end" placeholder="e.g. 55300000" min="1" />
+                </div>
+                <div class="input-group">
+                    <label for="sv-type">SV Type</label>
+                    <select id="sv-type">
+                        <option value="DEL">DEL – Deletion</option>
+                        <option value="DUP">DUP – Duplication</option>
+                        <option value="INV">INV – Inversion</option>
+                        <option value="INS">INS – Insertion</option>
+                        <option value="BND">BND – Translocation</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="sv-sample">Sample / Gene (optional)</label>
+                    <input type="text" id="sv-sample" placeholder="e.g. Patient_001, ABCB11" />
+                </div>
+            </div>
+
+            <div class="examples-row">
+                <span class="examples-label">Examples:</span>
+                <button class="example-chip" onclick="fillManual('18','55100000','55300000','DEL','IFC-Patient')">ABCB11
+                    large DEL</button>
+                <button class="example-chip"
+                    onclick="fillManual('1','26700000','26850000','DEL','ATP8B1-Patient')">ATP8B1 DEL</button>
+                <button class="example-chip" onclick="fillManual('13','20100000','20250000','DUP','ABCB4')">ABCB4
+                    DUP</button>
+                <button class="example-chip" onclick="fillManual('7','117120000','117307162','DEL','CFTR')">CFTR
+                    DEL</button>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn-analyze" id="btn-analyze-sv" onclick="analyzeSV()">
+                    <span>🔀</span> Analyze SV
+                </button>
+            </div>
+        </div>
+
+        <!-- VCF PASTE INPUT -->
+        <div class="input-panel hidden" id="panel-vcf">
+            <div class="vcf-help">
+                <p>Paste one or more VCF lines from <strong>Sniffles2</strong>, <strong>PBSV</strong>,
+                    <strong>Manta</strong> or <strong>SVABA</strong>.
+                    Header lines starting with <code>#</code> are ignored. The tool parses CHROM, POS, ALT, INFO
+                    (SVTYPE, END, SVLEN).</p>
+            </div>
+            <div class="input-group" style="margin-bottom:1rem">
+                <label for="vcf-input">VCF Lines (one SV per row)</label>
+                <textarea id="vcf-input" rows="7" placeholder="18&#9;55144033&#9;.&#9;N&#9;&lt;DEL&gt;&#9;.&#9;PASS&#9;SVTYPE=DEL;END=55300000;SVLEN=-156000&#9;GT&#9;0/1
+18&#9;55200000&#9;.&#9;N&#9;&lt;DUP&gt;&#9;.&#9;PASS&#9;SVTYPE=DUP;END=55250000;SVLEN=50000&#9;GT&#9;0/1"></textarea>
+            </div>
+            <div class="btn-row">
+                <button class="btn-analyze" onclick="analyzeVCF()">
+                    <span>📄</span> Parse &amp; Analyze VCF
+                </button>
+            </div>
+        </div>
+
+        <!-- STATUS BAR -->
+        <div class="status-bar" id="status-bar"></div>
+
+        <!-- LOADING -->
+        <div class="loading-overlay hidden" id="loading-overlay">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loading-text">Querying Ensembl…</div>
+        </div>
+
+        <!-- RESULTS -->
+        <div class="results-area hidden" id="results-area">
+
+            <!-- SV header card -->
+            <div class="sv-header-card" id="sv-header-card">
+                <div class="svh-left">
+                    <div class="sv-type-badge" id="sv-type-badge"></div>
+                    <div class="sv-coords" id="sv-coords"></div>
+                    <div class="sv-size" id="sv-size"></div>
+                </div>
+                <div class="svh-right">
+                    <div class="sv-verdicts" id="sv-verdicts"></div>
+                </div>
+            </div>
+
+            <!-- VCF multi-SV list (for VCF mode) -->
+            <div class="multi-sv-panel hidden" id="multi-sv-panel">
+                <div class="panel-header">
+                    <div class="panel-title"><span class="dot dot-teal"></span> Parsed SVs</div>
+                    <span class="panel-sub" id="multi-sv-count"></span>
+                </div>
+                <div class="sv-list" id="sv-list"></div>
+            </div>
+
+            <!-- Main grid -->
+            <div class="results-grid">
+
+                <!-- Gene overlap -->
+                <div class="result-panel" id="genes-panel">
+                    <div class="panel-header">
+                        <div class="panel-title"><span class="dot dot-teal"></span> Gene Overlap</div>
+                        <span class="panel-sub" id="genes-count"></span>
+                    </div>
+                    <div class="gene-list" id="gene-list"></div>
+                </div>
+
+                <!-- Classification -->
+                <div class="result-panel" id="class-panel">
+                    <div class="panel-header">
+                        <div class="panel-title"><span class="dot dot-purple"></span> Classification</div>
+                    </div>
+                    <div class="class-body" id="class-body"></div>
+                </div>
+
+            </div>
+
+            <!-- SVG Viewer -->
+            <div class="sv-viewer-panel">
+                <div class="panel-header">
+                    <div class="panel-title"><span class="dot dot-teal"></span> Genomic View</div>
+                    <div class="panel-controls">
+                        <span id="viewer-coords-label"
+                            style="font-size:.75rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace"></span>
+                    </div>
+                </div>
+                <div class="sv-svg-container">
+                    <svg id="sv-svg" width="100%" height="160"></svg>
+                </div>
+                <div class="sv-legend">
+                    <span class="leg-item leg-del">DEL</span>
+                    <span class="leg-item leg-dup">DUP</span>
+                    <span class="leg-item leg-inv">INV</span>
+                    <span class="leg-item leg-ins">INS</span>
+                    <span class="leg-item leg-gene">Gene</span>
+                </div>
+            </div>
+
+            <!-- External links -->
+            <div class="ext-panel">
+                <div class="panel-header">
+                    <div class="panel-title"><span class="dot dot-green"></span> External Resources</div>
+                </div>
+                <div class="ext-links" id="ext-links"></div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

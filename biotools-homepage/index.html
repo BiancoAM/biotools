@@ -897,6 +897,247 @@
             color: var(--accent)
         }
 
+        /* ── CONSULTING SECTION ── */
+        .consulting-hero {
+            text-align: center;
+            margin-bottom: 3.5rem
+        }
+
+        .consulting-services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 3.5rem
+        }
+
+        .service-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--rm);
+            padding: 1.6rem;
+            transition: all var(--tr);
+            position: relative;
+            overflow: hidden
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--grad1);
+            opacity: 0;
+            transition: opacity var(--tr)
+        }
+
+        .service-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-3px);
+            box-shadow: var(--glow-blue)
+        }
+
+        .service-card:hover::before { opacity: 1 }
+
+        .service-card.green::before { background: linear-gradient(90deg, var(--accent3), var(--accent)) }
+        .service-card.green:hover { box-shadow: 0 0 40px rgba(63,185,80,0.1) }
+        .service-card.orange::before { background: linear-gradient(90deg, var(--accent4), var(--red)) }
+        .service-card.orange:hover { box-shadow: 0 0 40px rgba(240,136,62,0.1) }
+        .service-card.purple::before { background: linear-gradient(90deg, var(--accent2), var(--accent)) }
+
+        .svc-icon {
+            font-size: 1.8rem;
+            margin-bottom: .9rem;
+            display: block
+        }
+
+        .svc-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: .5rem;
+            color: var(--text)
+        }
+
+        .svc-desc {
+            font-size: .84rem;
+            color: var(--text2);
+            line-height: 1.65;
+            margin-bottom: 1rem
+        }
+
+        .svc-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .35rem
+        }
+
+        .svc-tag {
+            font-size: .68rem;
+            font-family: 'JetBrains Mono', monospace;
+            padding: .15rem .5rem;
+            border-radius: 4px;
+            background: rgba(88,166,255,0.08);
+            color: var(--text2);
+            border: 1px solid var(--border)
+        }
+
+        /* ── CONTACT FORM ── */
+        .contact-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 2.5rem;
+            align-items: start
+        }
+
+        @media(max-width: 768px) {
+            .contact-wrap { grid-template-columns: 1fr }
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.4rem
+        }
+
+        .contact-info-item {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start
+        }
+
+        .ci-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            background: var(--bg3);
+            border: 1px solid var(--border)
+        }
+
+        .ci-text strong {
+            display: block;
+            font-size: .88rem;
+            color: var(--text);
+            margin-bottom: .2rem
+        }
+
+        .ci-text span {
+            font-size: .82rem;
+            color: var(--text2);
+            line-height: 1.6
+        }
+
+        .contact-form-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 2rem;
+        }
+
+        .contact-form-box h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text)
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem
+        }
+
+        @media(max-width: 520px) {
+            .form-row { grid-template-columns: 1fr }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: .4rem;
+            margin-bottom: 1rem
+        }
+
+        .form-group label {
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: .4px
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--rs);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: .88rem;
+            padding: .65rem .9rem;
+            transition: border-color var(--tr), box-shadow var(--tr);
+            outline: none;
+            width: 100%
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: rgba(88,166,255,0.5);
+            box-shadow: 0 0 0 3px rgba(88,166,255,0.08)
+        }
+
+        .form-group select option { background: var(--bg2) }
+
+        .form-group textarea { resize: vertical; min-height: 110px }
+
+        .form-note {
+            font-size: .75rem;
+            color: var(--text3);
+            margin-bottom: 1.2rem;
+            line-height: 1.5
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: .85rem;
+            background: linear-gradient(135deg, #0d9488, #1f6feb);
+            border: none;
+            border-radius: var(--rs);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: .95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--tr);
+            box-shadow: 0 4px 16px rgba(13,148,136,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(13,148,136,0.45)
+        }
+
+        .form-success {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: var(--accent3)
+        }
+
+        .form-success .success-icon { font-size: 2.5rem; margin-bottom: .75rem; display: block }
+        .form-success h4 { font-size: 1.1rem; margin-bottom: .5rem }
+        .form-success p { font-size: .85rem; color: var(--text2) }
+
         /* ── DIVIDER ── */
         .divider {
             height: 1px;
@@ -949,6 +1190,7 @@
                 <a href="#tools">Tools</a>
                 <a href="#about">About</a>
                 <a href="#roadmap">Roadmap</a>
+                <a href="#consulting" class="nav-btn" style="background:rgba(63,185,80,0.12);border-color:rgba(63,185,80,0.3);color:var(--accent3)">✉ Consulenza</a>
                 <a href="https://github.com" target="_blank" class="nav-btn">⬡ GitHub</a>
             </div>
         </div>
@@ -976,8 +1218,8 @@
 
             <div class="stats-bar">
                 <div class="stat">
-                    <div class="stat-num">5</div>
-                    <div class="stat-label">Active tools</div>
+                    <div class="stat-num">6</div>
+                    <div class="stat-label">Tools (3 live · 2 soon)</div>
                 </div>
                 <div class="stat">
                     <div class="stat-num">100%</div>
@@ -1047,48 +1289,45 @@
                     </div>
                 </div>
 
-                <!-- CARD 2: dPCR Analyzer -->
+                <!-- CARD 2: Phenotype Gene Matcher -->
                 <div class="tool-card purple">
-                    <div class="card-top-strip strip-green"></div>
+                    <div class="card-top-strip" style="background:linear-gradient(90deg,#bc8cff,#58a6ff)"></div>
                     <div class="card-header">
                         <div class="card-icon"
-                            style="background:linear-gradient(135deg,rgba(63,185,80,0.15),rgba(31,111,235,0.15));border:1px solid rgba(63,185,80,0.2)">
-                            🔬
-                            <span class="card-icon-badge badge-live">✓</span>
+                            style="background:linear-gradient(135deg,rgba(188,140,255,0.15),rgba(88,166,255,0.12));border:1px solid rgba(188,140,255,0.25)">
+                            🧩
+                            <span class="card-icon-badge badge-soon">⏳</span>
                         </div>
-                        <div class="card-title">dPCR Analyzer</div>
-                        <p class="card-desc">Automated analysis and visualisation of digital PCR results from QIAcuity.
-                            PDF data extraction, concentration calculation, charts and reports. Supports CNV and rare
-                            mutation experiments.</p>
+                        <div class="card-title">Phenotype Gene Matcher</div>
+                        <p class="card-desc">Map HPO phenotype terms to candidate genes via PanelApp, Orphanet and OMIM.
+                            Prioritise variants by phenotypic overlap score, inheritance pattern and disease association strength.</p>
                         <div class="card-tags">
-                            <span class="tag tag-green">R / Shiny</span>
-                            <span class="tag tag-blue">PDF Parser</span>
-                            <span class="tag tag-orange">QIAcuity</span>
-                            <span class="tag tag-green">CNV Analysis</span>
+                            <span class="tag tag-purple">HPO · OMIM</span>
+                            <span class="tag tag-blue">PanelApp</span>
+                            <span class="tag tag-purple">Orphanet</span>
+                            <span class="tag tag-green">Rare Diseases</span>
                         </div>
                     </div>
                     <div class="card-features">
                         <div class="feature">
-                            <div class="fi fi-green">✓</div>Automatic QIAcuity PDF parsing (v2 and v3)
+                            <div class="fi fi-green">✓</div>HPO term autocomplete and hierarchy traversal
                         </div>
                         <div class="feature">
-                            <div class="fi fi-green">✓</div>Concentration calculation copies/µL with 95% CI
+                            <div class="fi fi-green">✓</div>Gene prioritisation by phenotypic overlap score
                         </div>
                         <div class="feature">
-                            <div class="fi fi-green">✓</div>Interactive charts for each sample
+                            <div class="fi fi-green">✓</div>Inheritance pattern filter (AD, AR, XL, de novo)
                         </div>
                         <div class="feature">
-                            <div class="fi fi-green">✓</div>Data export in CSV and automatic report
+                            <div class="fi fi-green">✓</div>Integration with PanelApp gene panels
                         </div>
                         <div class="feature">
-                            <div class="fi fi-blue">↗</div>Also available on GitHub
+                            <div class="fi fi-blue">↗</div>Direct links to OMIM, Orphanet, ClinGen
                         </div>
                     </div>
                     <div class="card-footer">
-                        <a href="https://github.com" target="_blank" class="card-link card-link-primary purple-btn">⬡
-                            Download from GitHub</a>
-                        <a href="https://shinyapps.io" target="_blank" class="card-link card-link-secondary">▶ Demo</a>
-                        <span class="card-status status-live">● Live</span>
+                        <span class="card-link card-link-secondary" style="cursor:default;opacity:.6">🚧 In development</span>
+                        <span class="card-status status-soon">⏳ Soon</span>
                     </div>
                 </div>
 
@@ -1227,6 +1466,49 @@
                     </div>
                 </div>
 
+                <!-- CARD 6: CNV from WES Analyzer -->
+                <div class="tool-card">
+                    <div class="card-top-strip" style="background:linear-gradient(90deg,#3fb950,#58a6ff)"></div>
+                    <div class="card-header">
+                        <div class="card-icon"
+                            style="background:linear-gradient(135deg,rgba(63,185,80,0.15),rgba(88,166,255,0.12));border:1px solid rgba(63,185,80,0.25)">
+                            📊
+                            <span class="card-icon-badge badge-soon">⏳</span>
+                        </div>
+                        <div class="card-title">CNV from WES Analyzer</div>
+                        <p class="card-desc">Detect and visualise copy number variants from Whole Exome Sequencing data.
+                            Coverage-based CNV calling with normalisation, segmentation and OMIM/ClinGen gene annotation
+                            — optimised for rare disease diagnostic pipelines.</p>
+                        <div class="card-tags">
+                            <span class="tag tag-green">CNVkit · GATK</span>
+                            <span class="tag tag-blue">WES · hg38</span>
+                            <span class="tag tag-purple">OMIM · ClinGen</span>
+                            <span class="tag tag-orange">Rare Diseases</span>
+                        </div>
+                    </div>
+                    <div class="card-features">
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>Coverage-based CNV detection from WES BAM/BED
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>Normalisation, GC correction and segmentation
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>Exon-level visualisation with log₂ ratio tracks
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-green">✓</div>OMIM/ClinGen gene overlap and pathogenicity hint
+                        </div>
+                        <div class="feature">
+                            <div class="fi fi-blue">↗</div>Export to VCF and annotated TSV report
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-link card-link-secondary" style="cursor:default;opacity:.6">🚧 In development</span>
+                        <span class="card-status status-soon">⏳ Soon</span>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -1257,7 +1539,7 @@
                         available to the scientific community.</p>
                     <p>All tools are <strong>open source</strong>, freely usable for research and education, and welcome
                         community contributions.</p>
-                    <a href="mailto:your@email.com" class="btn-outline" style="margin-top:1rem;width:fit-content">✉
+                    <a href="biotools.genetics@gmail.com:your@email.com" class="btn-outline" style="margin-top:1rem;width:fit-content">✉
                         Contact me</a>
                 </div>
                 <div class="about-card">
@@ -1324,14 +1606,6 @@
                 <div class="roadmap-item done">
                     <div class="roadmap-dot"></div>
                     <div class="roadmap-info">
-                        <strong>dPCR Analyzer v1.0</strong>
-                        <span>Automatic analysis of QIAcuity results, concentration calculation and reports</span>
-                    </div>
-                    <span class="roadmap-badge status-live">✓ Completed</span>
-                </div>
-                <div class="roadmap-item done">
-                    <div class="roadmap-dot"></div>
-                    <div class="roadmap-info">
                         <strong>Variant Analyzer</strong>
                         <span>In silico predictors (SIFT, PolyPhen-2, SpliceAI, CADD), PubMed, ClinVar, gnomAD</span>
                     </div>
@@ -1353,9 +1627,182 @@
                     </div>
                     <span class="roadmap-badge status-live">✓ Completed</span>
                 </div>
+                <div class="roadmap-item active">
+                    <div class="roadmap-dot"></div>
+                    <div class="roadmap-info">
+                        <strong>Phenotype Gene Matcher</strong>
+                        <span>HPO → gene prioritisation via PanelApp, Orphanet and OMIM — inheritance filter and phenotypic overlap score</span>
+                    </div>
+                    <span class="roadmap-badge status-soon">⏳ In sviluppo</span>
+                </div>
+                <div class="roadmap-item active">
+                    <div class="roadmap-dot"></div>
+                    <div class="roadmap-info">
+                        <strong>CNV from WES Analyzer</strong>
+                        <span>Coverage-based CNV detection from WES — normalisation, segmentation, exon-level view, OMIM/ClinGen annotation</span>
+                    </div>
+                    <span class="roadmap-badge status-soon">⏳ In sviluppo</span>
+                </div>
                 
         </div>
     </section>
+
+    <div class="divider"></div>
+
+    <!-- CONSULTING SECTION -->
+    <section id="consulting">
+        <div class="wrap">
+            <div class="section-label">Collaborazioni & Consulenze</div>
+            <div class="consulting-hero">
+                <div class="section-title">Hai una variante difficile da classificare?</div>
+                <p class="section-sub" style="margin:0 auto">Offro consulenze specialistiche per l'interpretazione di varianti genetiche, analisi di pipeline WES/WGS e supporto bioinformatico per la ricerca clinica sulle malattie rare.</p>
+            </div>
+
+            <!-- SERVICE CARDS -->
+            <div class="consulting-services">
+                <div class="service-card green">
+                    <span class="svc-icon">🧬</span>
+                    <div class="svc-title">Interpretazione Varianti</div>
+                    <p class="svc-desc">Classificazione ACMG/AMP di varianti SNV, indel e splicing. Analisi in silico integrata (SpliceAI, CADD, REVEL), revisione letteratura, valutazione segregazione familiare.</p>
+                    <div class="svc-tags">
+                        <span class="svc-tag">ACMG/AMP 2015</span>
+                        <span class="svc-tag">SpliceAI</span>
+                        <span class="svc-tag">ClinVar</span>
+                        <span class="svc-tag">gnomAD</span>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <span class="svc-icon">🔀</span>
+                    <div class="svc-title">Varianti Strutturali & CNV</div>
+                    <p class="svc-desc">Analisi e classificazione di SVs da WGS Long Read (Sniffles2, PBSV) e CNV da WES. Valutazione overlap genico, confronto con DECIPHER/DGV/gnomAD-SV, referto interpretativo.</p>
+                    <div class="svc-tags">
+                        <span class="svc-tag">ONT / PacBio</span>
+                        <span class="svc-tag">DEL · DUP · INV</span>
+                        <span class="svc-tag">DECIPHER</span>
+                        <span class="svc-tag">CNVkit</span>
+                    </div>
+                </div>
+                <div class="service-card orange">
+                    <span class="svc-icon">🗄️</span>
+                    <div class="svc-title">Pipeline WES/WGS & Filtraggio</div>
+                    <p class="svc-desc">Supporto su pipeline di analisi end-to-end: fastp, BWA, GATK, ANNOVAR/VEP. Query SQL su database VCF annotati per ereditarietà dominante, recessiva, de novo, X-linked e compound eterozigosi.</p>
+                    <div class="svc-tags">
+                        <span class="svc-tag">GATK HaplotypeCaller</span>
+                        <span class="svc-tag">ANNOVAR</span>
+                        <span class="svc-tag">PostgreSQL</span>
+                        <span class="svc-tag">Trio analysis</span>
+                    </div>
+                </div>
+                <div class="service-card purple">
+                    <span class="svc-icon">📋</span>
+                    <div class="svc-title">Fenotipizzazione & Gene Panels</div>
+                    <p class="svc-desc">Mappatura HPO → geni candidati tramite PanelApp e Orphanet. Prioritizzazione varianti per overlap fenotipico e pattern di trasmissione. Supporto alla diagnosi in malattie rare non diagnosticate.</p>
+                    <div class="svc-tags">
+                        <span class="svc-tag">HPO</span>
+                        <span class="svc-tag">PanelApp</span>
+                        <span class="svc-tag">Orphanet</span>
+                        <span class="svc-tag">OMIM</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTACT FORM + INFO -->
+            <div class="contact-wrap">
+
+                <!-- Left: info -->
+                <div class="contact-info">
+                    <div>
+                        <div class="section-title" style="font-size:1.5rem;margin-bottom:.75rem">Parliamone</div>
+                        <p style="font-size:.9rem;color:var(--text2);line-height:1.8">Compila il form con una breve descrizione del caso o della richiesta. Rispondo entro 48 ore lavorative con una valutazione preliminare e, se pertinente, una proposta di collaborazione.</p>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="ci-icon">⏱</div>
+                        <div class="ci-text">
+                            <strong>Risposta entro 48h</strong>
+                            <span>Valutazione preliminare gratuita per capire se posso essere utile al tuo caso</span>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="ci-icon">🔒</div>
+                        <div class="ci-text">
+                            <strong>Riservatezza garantita</strong>
+                            <span>Tutti i dati clinici condivisi sono trattati con massima riservatezza e anonimizzati</span>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="ci-icon">🎓</div>
+                        <div class="ci-text">
+                            <strong>Tariffe agevolate per ricerca accademica</strong>
+                            <span>Condizioni speciali per università, ospedali e progetti di ricerca no-profit</span>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="ci-icon">🌍</div>
+                        <div class="ci-text">
+                            <strong>Italiano & Inglese</strong>
+                            <span>Consulenze disponibili in entrambe le lingue, report redatti nella lingua preferita</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: form -->
+                <div class="contact-form-box">
+                    <h3>📩 Richiedi una consulenza</h3>
+                    <div id="contact-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nome *</label>
+                                <input type="text" id="f-name" placeholder="Es. Mario Rossi" />
+                            </div>
+                            <div class="form-group">
+                                <label>Email *</label>
+                                <input type="email" id="f-email" placeholder="mario@istituto.it" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Istituzione / Laboratorio</label>
+                                <input type="text" id="f-institution" placeholder="Università / Ospedale / Lab" />
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo di richiesta *</label>
+                                <select id="f-type">
+                                    <option value="">Seleziona…</option>
+                                    <option>Interpretazione variante SNV/Indel</option>
+                                    <option>Interpretazione variante di splicing</option>
+                                    <option>Analisi variante strutturale / CNV</option>
+                                    <option>Supporto pipeline WES/WGS</option>
+                                    <option>Fenotipizzazione / gene panel</option>
+                                    <option>Collaborazione a progetto di ricerca</option>
+                                    <option>Altro</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Gene / Variante (se applicabile)</label>
+                            <input type="text" id="f-variant" placeholder="Es. ABCB11 c.3084+1G>A · chr18:55144033 DEL 156kb" style="font-family:'JetBrains Mono',monospace;font-size:.82rem" />
+                        </div>
+                        <div class="form-group">
+                            <label>Descrizione della richiesta *</label>
+                            <textarea id="f-message" placeholder="Descrivi brevemente il caso clinico, il contesto della ricerca o la pipeline su cui hai bisogno di supporto. Più dettagli fornisci, più accurata sarà la mia risposta preliminare."></textarea>
+                        </div>
+                        <div class="form-note">* Campi obbligatori. I dati sono utilizzati esclusivamente per rispondere alla richiesta e non vengono condivisi con terzi.</div>
+                        <button class="btn-submit" onclick="submitConsultingForm()">
+                            <span>✉</span> Invia richiesta
+                        </button>
+                    </div>
+                    <div class="form-success" id="form-success">
+                        <span class="success-icon">✅</span>
+                        <h4>Richiesta inviata!</h4>
+                        <p>Grazie per avermi contattato. Riceverai una risposta all'indirizzo email indicato entro 48 ore lavorative.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
 
     <!-- FOOTER -->
     <footer>
@@ -1368,10 +1815,11 @@
                 <div class="footer-links-group">
                     <h4>Tools</h4>
                     <a href="../mirna-utr-mapper/index.html">miRNA 3'UTR Mapper</a>
-                    <a href="https://github.com">dPCR Analyzer</a>
                     <a href="https://variant-analyzer.onrender.com">Variant Analyzer</a>
                     <a href="../splicing-analyzer/index.html">Splicing Analyzer</a>
                     <a href="../sv-analyzer/index.html">SV Analyzer</a>
+                    <a href="#" style="opacity:.5;cursor:default">Phenotype Gene Matcher <sup>soon</sup></a>
+                    <a href="#" style="opacity:.5;cursor:default">CNV from WES Analyzer <sup>soon</sup></a>
                 </div>
                 <div class="footer-links-group">
                     <h4>Resources</h4>
@@ -1382,7 +1830,8 @@
                 </div>
                 <div class="footer-links-group">
                     <h4>Contact</h4>
-                    <a href="mailto:your@email.com">✉ Email</a>
+                    <a href="#consulting">✉ Consulenza</a>
+                    <a href="biotools.genetics@gmail.com:your@email.com">✉ Email diretto</a>
                     <a href="https://github.com" target="_blank">⬡ GitHub</a>
                     <a href="https://orcid.org" target="_blank">ORCID</a>
                 </div>
@@ -1409,6 +1858,36 @@
         </div>
     </footer>
 
+    <script>
+        function submitConsultingForm() {
+            const name = document.getElementById('f-name').value.trim();
+            const email = document.getElementById('f-email').value.trim();
+            const type = document.getElementById('f-type').value;
+            const message = document.getElementById('f-message').value.trim();
+
+            if (!name || !email || !type || !message) {
+                alert('Per favore compila tutti i campi obbligatori (*).');
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                alert('Inserisci un indirizzo email valido.');
+                return;
+            }
+
+            // Build biotools.genetics@gmail.com link as fallback (replace with backend/Formspree when ready)
+            const institution = document.getElementById('f-institution').value.trim();
+            const variant = document.getElementById('f-variant').value.trim();
+            const subject = encodeURIComponent(`[BioTools Consulenza] ${type} – ${name}`);
+            const body = encodeURIComponent(
+                `Nome: ${name}\nEmail: ${email}\nIstituzione: ${institution || '—'}\nTipo: ${type}\nVariante/Gene: ${variant || '—'}\n\n${message}`
+            );
+            window.location.href = `biotools.genetics@gmail.com:your@email.com?subject=${subject}&body=${body}`;
+
+            // Show success state
+            document.getElementById('contact-form').style.display = 'none';
+            document.getElementById('form-success').style.display = 'block';
+        }
+    </script>
 </body>
 
 </html>

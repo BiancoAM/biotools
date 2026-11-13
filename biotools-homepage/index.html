@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BioTools – Bioinformatics Tools for Molecular Genetics</title>
     <meta name="description"
-        content="Open source bioinformatics tools for molecular genetics research: miRNA analysis, dPCR, rare genetic diseases and variant interpretation." />
+        content="Open source bioinformatics tools for molecular genetics research: miRNA analysis, rare genetic diseases and variant interpretation." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
@@ -1208,7 +1208,7 @@
                 <span class="line2">Clinical Genetic Research</span>
             </h1>
             <p class="hero-sub">
-                Interactive tools for the analysis of genetic variants, miRNA, dPCR and rare diseases.
+                Interactive tools for the analysis of genetic variants, miRNA and rare diseases.
                 Designed by a molecular biologist geneticist, for researchers.
             </p>
             <div class="hero-cta">
@@ -1219,7 +1219,7 @@
             <div class="stats-bar">
                 <div class="stat">
                     <div class="stat-num">6</div>
-                    <div class="stat-label">Tools (3 live · 2 soon)</div>
+                    <div class="stat-label">Tools (4 live · 2 soon)</div>
                 </div>
                 <div class="stat">
                     <div class="stat-num">100%</div>
@@ -1509,6 +1509,7 @@
                     </div>
                 </div>
 
+
             </div>
 
         </div>
@@ -1539,7 +1540,7 @@
                         available to the scientific community.</p>
                     <p>All tools are <strong>open source</strong>, freely usable for research and education, and welcome
                         community contributions.</p>
-                    <a href="biotools.genetics@gmail.com:your@email.com" class="btn-outline" style="margin-top:1rem;width:fit-content">✉
+                    <a href="mailto:biotools.genetics@gmail.com" class="btn-outline" style="margin-top:1rem;width:fit-content">✉
                         Contact me</a>
                 </div>
                 <div class="about-card">
@@ -1643,6 +1644,7 @@
                     </div>
                     <span class="roadmap-badge status-soon">⏳ In sviluppo</span>
                 </div>
+
                 
         </div>
     </section>
@@ -1655,7 +1657,7 @@
             <div class="section-label">Collaborazioni & Consulenze</div>
             <div class="consulting-hero">
                 <div class="section-title">Hai una variante difficile da classificare?</div>
-                <p class="section-sub" style="margin:0 auto">Offro consulenze specialistiche per l'interpretazione di varianti genetiche, analisi di pipeline WES/WGS e supporto bioinformatico per la ricerca clinica sulle malattie rare.</p>
+                <p class="section-sub" style="margin:0 auto">Offro consulenze specialistiche per l'interpretazione di varianti genetiche, l'annotazione e il filtraggio di VCF e il supporto bioinformatico per la ricerca clinica sulle malattie rare.</p>
             </div>
 
             <!-- SERVICE CARDS -->
@@ -1684,11 +1686,13 @@
                 </div>
                 <div class="service-card orange">
                     <span class="svc-icon">🗄️</span>
-                    <div class="svc-title">Pipeline WES/WGS & Filtraggio</div>
-                    <p class="svc-desc">Supporto su pipeline di analisi end-to-end: fastp, BWA, GATK, ANNOVAR/VEP. Query SQL su database VCF annotati per ereditarietà dominante, recessiva, de novo, X-linked e compound eterozigosi.</p>
+                    <div class="svc-title">Annotazione & Filtraggio Varianti</div>
+                    <p class="svc-desc">Si parte da dove sei: un VCF grezzo da annotare, un VCF già annotato da filtrare e prioritizzare, oppure una singola variante da interpretare. Annotazione (ANNOVAR/VEP) e query SQL su database VCF per ereditarietà dominante, recessiva, de novo, X-linked e compound eterozigosi, in singoli casi, trii e famiglie.</p>
                     <div class="svc-tags">
-                        <span class="svc-tag">GATK HaplotypeCaller</span>
-                        <span class="svc-tag">ANNOVAR</span>
+                        <span class="svc-tag">VCF grezzo</span>
+                        <span class="svc-tag">VCF annotato</span>
+                        <span class="svc-tag">Singola variante</span>
+                        <span class="svc-tag">ANNOVAR · VEP</span>
                         <span class="svc-tag">PostgreSQL</span>
                         <span class="svc-tag">Trio analysis</span>
                     </div>
@@ -1771,7 +1775,7 @@
                                     <option>Interpretazione variante SNV/Indel</option>
                                     <option>Interpretazione variante di splicing</option>
                                     <option>Analisi variante strutturale / CNV</option>
-                                    <option>Supporto pipeline WES/WGS</option>
+                                    <option>Annotazione / filtraggio VCF</option>
                                     <option>Fenotipizzazione / gene panel</option>
                                     <option>Collaborazione a progetto di ricerca</option>
                                     <option>Altro</option>
@@ -1784,7 +1788,7 @@
                         </div>
                         <div class="form-group">
                             <label>Descrizione della richiesta *</label>
-                            <textarea id="f-message" placeholder="Descrivi brevemente il caso clinico, il contesto della ricerca o la pipeline su cui hai bisogno di supporto. Più dettagli fornisci, più accurata sarà la mia risposta preliminare."></textarea>
+                            <textarea id="f-message" placeholder="Descrivi brevemente il caso clinico, il contesto della ricerca o l'analisi su cui hai bisogno di supporto. Più dettagli fornisci, più accurata sarà la mia risposta preliminare."></textarea>
                         </div>
                         <div class="form-note">* Campi obbligatori. I dati sono utilizzati esclusivamente per rispondere alla richiesta e non vengono condivisi con terzi.</div>
                         <button class="btn-submit" onclick="submitConsultingForm()">
@@ -1831,7 +1835,7 @@
                 <div class="footer-links-group">
                     <h4>Contact</h4>
                     <a href="#consulting">✉ Consulenza</a>
-                    <a href="biotools.genetics@gmail.com:your@email.com">✉ Email diretto</a>
+                    <a href="mailto:biotools.genetics@gmail.com">✉ Email diretto</a>
                     <a href="https://github.com" target="_blank">⬡ GitHub</a>
                     <a href="https://orcid.org" target="_blank">ORCID</a>
                 </div>
@@ -1874,14 +1878,14 @@
                 return;
             }
 
-            // Build biotools.genetics@gmail.com link as fallback (replace with backend/Formspree when ready)
+            // Apre il client di posta dell'utente (sostituire con un backend/Formspree per un invio diretto)
             const institution = document.getElementById('f-institution').value.trim();
             const variant = document.getElementById('f-variant').value.trim();
             const subject = encodeURIComponent(`[BioTools Consulenza] ${type} – ${name}`);
             const body = encodeURIComponent(
                 `Nome: ${name}\nEmail: ${email}\nIstituzione: ${institution || '—'}\nTipo: ${type}\nVariante/Gene: ${variant || '—'}\n\n${message}`
             );
-            window.location.href = `biotools.genetics@gmail.com:your@email.com?subject=${subject}&body=${body}`;
+            window.location.href = `mailto:biotools.genetics@gmail.com?subject=${subject}&body=${body}`;
 
             // Show success state
             document.getElementById('contact-form').style.display = 'none';

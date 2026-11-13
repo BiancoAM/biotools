@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ACMG Calculator – BioTools</title>
+    <meta name="description"
+        content="Calcolatore di classificazione delle varianti ACMG/AMP 2015: regole combinatorie e sistema a punti bayesiano, con sottoclassi VUS. Parte della suite BioTools." />
+    <style>
+:root {
+    --bg: #070d19;
+    --bg2: #0d1628;
+    --bg3: #111d33;
+    --card: #0f1c35;
+    --border: rgba(56, 80, 130, 0.35);
+    --border-glow: rgba(88, 166, 255, 0.25);
+    --accent: #58a6ff;
+    --accent2: #bc8cff;
+    --accent3: #3fb950;
+    --accent4: #f0883e;
+    --red: #ff7b72;
+    --yellow: #d29922;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text3: #5b6573;
+    --grad1: linear-gradient(135deg, #1f6feb, #8957e5);
+    --r: 16px;
+    --rm: 12px;
+    --rs: 8px;
+    --tr: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+html { scroll-behavior: smooth }
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+.hidden { display: none !important }
+
+/* header */
+header {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    background: rgba(7, 13, 25, 0.85);
+    border-bottom: 1px solid var(--border);
+}
+.header-inner {
+    max-width: 1200px; margin: 0 auto; padding: .8rem 1.5rem;
+    display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+}
+.logo { display: flex; align-items: center; gap: .6rem; color: var(--text) }
+.logo-icon {
+    width: 34px; height: 34px; border-radius: 8px; background: var(--grad1);
+    display: flex; align-items: center; justify-content: center; font-size: 1rem;
+}
+.logo-text h1 { font-size: .95rem; font-weight: 700; line-height: 1.1 }
+.logo-text span { font-size: .68rem; color: var(--text-muted) }
+.tool-title { display: flex; align-items: center; gap: .6rem; padding-left: 1.5rem; border-left: 1px solid var(--border) }
+.tool-icon { font-size: 1.4rem }
+.tool-name { font-size: .95rem; font-weight: 700 }
+.tool-sub { font-size: .72rem; color: var(--text-muted) }
+.header-badges { margin-left: auto; display: flex; gap: .5rem }
+.badge { font-size: .7rem; font-weight: 600; padding: .25rem .7rem; border-radius: 20px; border: 1px solid }
+.badge-purple { color: var(--accent2); background: rgba(188,140,255,.1); border-color: rgba(188,140,255,.3) }
+.badge-blue { color: var(--accent); background: rgba(88,166,255,.1); border-color: rgba(88,166,255,.3) }
+
+main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem }
+
+.search-hero { text-align: center; margin-bottom: 1.8rem }
+.search-hero h2 {
+    font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 800; letter-spacing: -.5px; margin-bottom: .6rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.search-hero p { color: var(--text-muted); max-width: 680px; margin: 0 auto; font-size: .95rem }
+
+/* input */
+.input-panel {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 1.4rem 1.6rem; margin-bottom: 1.5rem;
+}
+.input-grid { display: grid; grid-template-columns: 1fr 3fr; gap: 1rem }
+@media (max-width: 640px) { .input-grid { grid-template-columns: 1fr } }
+.input-group { display: flex; flex-direction: column; gap: .35rem }
+.input-group label {
+    font-size: .72rem; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .5px;
+}
+input[type=text], select {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: var(--rs);
+    color: var(--text); font-family: 'Inter', sans-serif; font-size: .88rem;
+    padding: .6rem .8rem; outline: none; width: 100%;
+    transition: border-color var(--tr), box-shadow var(--tr);
+}
+input[type=text]:focus, select:focus {
+    border-color: rgba(88,166,255,.5); box-shadow: 0 0 0 3px rgba(88,166,255,.08);
+}
+select option { background: var(--bg2) }
+
+.examples-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: 1rem }
+.examples-label { font-size: .75rem; color: var(--text-muted); font-weight: 600 }
+.example-chip {
+    font-family: 'Inter', sans-serif; font-size: .75rem; font-weight: 500;
+    padding: .3rem .8rem; border-radius: 20px; cursor: pointer;
+    background: rgba(88,166,255,.08); border: 1px solid rgba(88,166,255,.25); color: var(--accent);
+    transition: all var(--tr);
+}
+.example-chip:hover { background: rgba(88,166,255,.16) }
+#btn-reset { margin-left: auto; background: transparent; border-color: var(--border); color: var(--text-muted) }
+.scope-note { font-size: .75rem; color: var(--text3); margin-top: .9rem }
+
+/* layout */
+.layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 1.5rem; align-items: start }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr } .result-col { order: -1 } }
+.criteria-col { display: flex; flex-direction: column; gap: 1.5rem }
+
+.result-panel {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden;
+}
+.result-sticky { position: sticky; top: 84px }
+@media (max-width: 900px) { .result-sticky { position: static } }
+.panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .9rem 1.2rem; border-bottom: 1px solid var(--border);
+}
+.panel-title { display: flex; align-items: center; gap: .5rem; font-size: .88rem; font-weight: 700 }
+.panel-sub { font-size: .72rem; color: var(--text-muted) }
+.dot { width: 8px; height: 8px; border-radius: 50% }
+.dot-red { background: var(--red) }
+.dot-green { background: var(--accent3) }
+.dot-purple { background: var(--accent2) }
+
+/* criteri */
+.crit-list { padding: .4rem 1rem 1rem }
+.crit-group {
+    font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text3); margin: 1rem 0 .4rem;
+}
+.crit {
+    border: 1px solid var(--border); border-radius: var(--rs); padding: .7rem .8rem; margin-bottom: .5rem;
+    background: var(--bg2); transition: border-color var(--tr), background var(--tr);
+}
+.crit.on { border-color: rgba(88,166,255,.5); background: rgba(88,166,255,.06) }
+.crit-deprecated { opacity: .7 }
+.crit-top { display: flex; align-items: center; justify-content: space-between; gap: .8rem }
+.crit-check { display: flex; align-items: center; gap: .6rem; cursor: pointer }
+.crit-check input { width: 16px; height: 16px; accent-color: var(--accent) }
+.crit-code {
+    font-family: 'JetBrains Mono', monospace; font-size: .8rem; font-weight: 600;
+    padding: .1rem .5rem; border-radius: 4px;
+}
+.code-p { color: var(--red); background: rgba(255,123,114,.1) }
+.code-b { color: var(--accent3); background: rgba(63,185,80,.1) }
+.crit-strength { width: auto; padding: .3rem .5rem; font-size: .78rem }
+.crit-text { font-size: .8rem; color: var(--text-muted); margin-top: .45rem; line-height: 1.5 }
+.crit-hint { font-size: .74rem; color: var(--yellow); margin-top: .35rem }
+.crit-note { display: none; margin-top: .5rem; font-size: .78rem; padding: .4rem .6rem }
+.crit.on .crit-note { display: block }
+
+/* risultato */
+.result-empty { padding: 2rem 1.2rem; text-align: center; color: var(--text-muted); font-size: .88rem }
+.result-body { padding: 1.2rem }
+.res-block { margin-bottom: 1.3rem }
+.res-label {
+    font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px;
+    color: var(--text3); margin-bottom: .5rem;
+}
+.class-badge {
+    display: inline-block; font-size: 1rem; font-weight: 700; padding: .5rem 1rem;
+    border-radius: var(--rs); border: 1px solid;
+}
+.cls-P { color: #ff7b72; background: rgba(255,123,114,.12); border-color: rgba(255,123,114,.4) }
+.cls-LP { color: #f0883e; background: rgba(240,136,62,.12); border-color: rgba(240,136,62,.4) }
+.cls-VUS { color: #d29922; background: rgba(210,153,34,.12); border-color: rgba(210,153,34,.4) }
+.cls-LB { color: #58a6ff; background: rgba(88,166,255,.12); border-color: rgba(88,166,255,.4) }
+.cls-B { color: #3fb950; background: rgba(63,185,80,.12); border-color: rgba(63,185,80,.4) }
+
+.points-row { display: flex; align-items: baseline; gap: .4rem; margin: .8rem 0 .5rem }
+.points-total { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 700 }
+.points-unit { color: var(--text-muted); font-size: .85rem }
+
+.scale-bar { position: relative; display: flex; height: 22px; border-radius: 6px; overflow: hidden }
+.seg {
+    display: flex; align-items: center; justify-content: center;
+    font-size: .65rem; font-weight: 700; color: rgba(0,0,0,.65);
+}
+.seg-b { background: #3fb950 }
+.seg-lb { background: #58a6ff }
+.seg-vus { background: #d29922 }
+.seg-lp { background: #f0883e }
+.seg-p { background: #ff7b72 }
+.scale-marker {
+    position: absolute; top: -3px; bottom: -3px; width: 3px; margin-left: -1.5px;
+    background: #fff; border-radius: 2px; box-shadow: 0 0 6px rgba(255,255,255,.8);
+    transition: left .25s ease;
+}
+.scale-ticks {
+    display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace;
+    font-size: .62rem; color: var(--text3); margin-top: .3rem;
+}
+.vus-sub {
+    margin-top: .7rem; font-size: .8rem; color: var(--yellow);
+    background: rgba(210,153,34,.08); border: 1px solid rgba(210,153,34,.25);
+    border-radius: var(--rs); padding: .5rem .7rem;
+}
+
+.alert { font-size: .78rem; border-radius: var(--rs); padding: .55rem .7rem; margin-bottom: .6rem; line-height: 1.5 }
+.alert-warn { color: var(--yellow); background: rgba(210,153,34,.08); border: 1px solid rgba(210,153,34,.25) }
+.alert-info { color: var(--accent); background: rgba(88,166,255,.08); border: 1px solid rgba(88,166,255,.25) }
+
+.evidence-list { list-style: none; font-size: .82rem; display: flex; flex-direction: column; gap: .4rem }
+.evidence-list li { padding: .4rem .6rem; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px }
+.ev-note { font-size: .74rem; color: var(--text-muted); margin-top: .15rem }
+
+.btn-row-sm { display: flex; gap: .6rem; flex-wrap: wrap }
+.btn-analyze {
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: .85rem; cursor: pointer;
+    padding: .6rem 1.1rem; border: none; border-radius: var(--rs); color: #fff;
+    background: var(--grad1); box-shadow: 0 4px 14px rgba(31,111,235,.3); transition: all var(--tr);
+}
+.btn-analyze:hover { transform: translateY(-1px) }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); box-shadow: none }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent) }
+
+/* note */
+.refs {
+    margin-top: 2rem; background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--rm); padding: 1.2rem 1.5rem;
+}
+.refs h3 { font-size: .9rem; margin-bottom: .7rem }
+.refs ul { padding-left: 1.1rem; font-size: .8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: .5rem }
+.refs strong { color: var(--text) }
+
+.flash {
+    position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 20px);
+    background: var(--bg3); color: var(--text); border: 1px solid var(--border-glow);
+    padding: .6rem 1.1rem; border-radius: 20px; font-size: .82rem;
+    opacity: 0; pointer-events: none; transition: all .25s ease; z-index: 100;
+}
+.flash.show { opacity: 1; transform: translate(-50%, 0) }
+
+</style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body>
+
+    <header>
+        <div class="header-inner">
+            <a href="../biotools-homepage/index.html" class="logo" style="text-decoration:none">
+                <div class="logo-icon">🧬</div>
+                <div class="logo-text">
+                    <h1>BioTools</h1>
+                    <span>Molecular Genetics Suite</span>
+                </div>
+            </a>
+            <div class="tool-title">
+                <span class="tool-icon">⚖️</span>
+                <div>
+                    <div class="tool-name">ACMG Calculator</div>
+                    <div class="tool-sub">ACMG/AMP 2015 · Punti bayesiani · Sottoclassi VUS</div>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge badge-purple">Classificazione</span>
+                <span class="badge badge-blue">Mendeliane</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        <div class="search-hero">
+            <h2>Classificazione ACMG/AMP</h2>
+            <p>Seleziona i criteri applicabili e modula la forza di ciascuno: il tool calcola la classe con le regole
+                combinatorie del 2015 e con il sistema a punti, e mostra quanto è vicina una VUS alla soglia Likely
+                Pathogenic.</p>
+        </div>
+
+        <div class="input-panel">
+            <div class="input-grid">
+                <div class="input-group">
+                    <label for="v-gene">Gene (facoltativo)</label>
+                    <input type="text" id="v-gene" placeholder="es. ABCB4" style="text-transform:uppercase" />
+                </div>
+                <div class="input-group input-wide">
+                    <label for="v-variant">Variante (facoltativo)</label>
+                    <input type="text" id="v-variant" placeholder="es. NM_000443.4:c.1234G>A p.(Gly412Arg)" />
+                </div>
+            </div>
+            <div class="examples-row">
+                <span class="examples-label">Esempi:</span>
+                <button class="example-chip" data-example="lof">Null + PM2 + PM3</button>
+                <button class="example-chip" data-example="missense">Missense raro (VUS)</button>
+                <button class="example-chip" data-example="common">Variante frequente (BA1)</button>
+                <button class="example-chip" id="btn-reset">↺ Azzera</button>
+            </div>
+            <p class="scope-note">Strumento pensato per le forme mendeliane. Per gli alleli di rischio (es. ICP, DIC)
+                l'ACMG classico non è appropriato.</p>
+        </div>
+
+        <div class="layout">
+
+            <!-- CRITERI -->
+            <div class="criteria-col">
+                <div class="result-panel">
+                    <div class="panel-header">
+                        <div class="panel-title"><span class="dot dot-red"></span> Evidenze patogeniche</div>
+                        <span class="panel-sub">• = forza predefinita</span>
+                    </div>
+                    <div class="crit-list" id="crit-path"></div>
+                </div>
+
+                <div class="result-panel">
+                    <div class="panel-header">
+                        <div class="panel-title"><span class="dot dot-green"></span> Evidenze benigne</div>
+                    </div>
+                    <div class="crit-list" id="crit-ben"></div>
+                </div>
+            </div>
+
+            <!-- RISULTATO -->
+            <aside class="result-col">
+                <div class="result-panel result-sticky">
+                    <div class="panel-header">
+                        <div class="panel-title"><span class="dot dot-purple"></span> Risultato</div>
+                    </div>
+
+                    <div class="result-empty" id="result-empty">
+                        Seleziona almeno un criterio per vedere la classificazione.
+                    </div>
+
+                    <div class="result-body hidden" id="result-body">
+                        <div class="res-block">
+                            <div class="res-label">Regole combinatorie ACMG/AMP 2015</div>
+                            <div class="class-badge" id="badge-comb"></div>
+                        </div>
+
+                        <div class="res-block">
+                            <div class="res-label">Sistema a punti (Tavtigian)</div>
+                            <div class="class-badge" id="badge-pts"></div>
+                            <div class="points-row">
+                                <span class="points-total" id="points-total">0</span>
+                                <span class="points-unit">punti</span>
+                            </div>
+                            <div class="scale">
+                                <div class="scale-bar">
+                                    <span class="seg seg-b" style="flex:3">B</span>
+                                    <span class="seg seg-lb" style="flex:6">LB</span>
+                                    <span class="seg seg-vus" style="flex:6">VUS</span>
+                                    <span class="seg seg-lp" style="flex:4">LP</span>
+                                    <span class="seg seg-p" style="flex:3">P</span>
+                                    <span class="scale-marker" id="scale-marker"></span>
+                                </div>
+                                <div class="scale-ticks"><span>≤ −7</span><span>−1</span><span>0</span><span>6</span><span>≥ 10</span></div>
+                            </div>
+                            <div class="vus-sub hidden" id="vus-sub"></div>
+                        </div>
+
+                        <div id="alerts"></div>
+
+                        <div class="res-block">
+                            <div class="res-label">Evidenze applicate</div>
+                            <ul class="evidence-list" id="evidence-list"></ul>
+                        </div>
+
+                        <div class="btn-row-sm">
+                            <button class="btn-analyze btn-small" id="btn-copy">⎘ Copia riepilogo</button>
+                            <button class="btn-analyze btn-small btn-ghost" id="btn-csv">⬇ Esporta CSV</button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <div class="refs">
+            <h3>Note metodologiche</h3>
+            <ul>
+                <li><strong>Regole combinatorie:</strong> Richards et al., Genet Med 2015 (Table 5). Con criteri
+                    patogenici e benigni in conflitto la variante resta VUS.</li>
+                <li><strong>Punti:</strong> Supporting ±1, Moderate ±2, Strong ±4, Very Strong +8, Stand-alone benigno
+                    −8. Soglie: Patogenica ≥ 10, Probabilmente patogenica 6–9, VUS 0–5, Probabilmente benigna da −1 a
+                    −6, Benigna ≤ −7 (Tavtigian et al., Genet Med 2018; Hum Mutat 2020).</li>
+                <li><strong>Sottoclassi VUS:</strong> warm/hot = 4–5 punti, cool/cold/tepid = 0–3 (Genet Med 2022).
+                    La suddivisione interna (hot = 5, warm = 4, cool = 2, cold = 0–1) è una lettura da verificare.
+                    Le sottoclassi sono pensate per uso interno e non vanno riportate nei referti.</li>
+                <li><strong>Limiti:</strong> il tool non valuta le evidenze: applica le regole alla selezione dell'utente.
+                    Le specifiche gene-specifiche (soglie di frequenza, domini critici) non sono incluse.
+                    Strumento di supporto alla ricerca, non uso diagnostico.</li>
+            </ul>
+        </div>
+
+    </main>
+
+    <div class="flash" id="flash" role="status"></div>
+
+    <script>
+/* ACMG Calculator – BioTools
+   Regole combinatorie ACMG/AMP 2015 (Richards et al.) + sistema a punti (Tavtigian et al. 2018/2020).
+   Solo forme mendeliane. Nessun dato lascia il browser. */
+
+/* ───────────── DATI ───────────── */
+
+const STRENGTH_LABEL = {
+  very_strong: 'Very Strong',
+  strong: 'Strong',
+  moderate: 'Moderate',
+  supporting: 'Supporting',
+  stand_alone: 'Stand-alone'
+};
+const PTS_P = { very_strong: 8, strong: 4, moderate: 2, supporting: 1 };
+const PTS_B = { stand_alone: -8, strong: -4, supporting: -1 };
+const OPTS_P = ['very_strong', 'strong', 'moderate', 'supporting'];
+const OPTS_B = ['stand_alone', 'strong', 'supporting'];
+
+const CLASS_LABEL = {
+  P: 'Patogenica',
+  LP: 'Probabilmente patogenica',
+  VUS: 'VUS',
+  LB: 'Probabilmente benigna',
+  B: 'Benigna'
+};
+
+/* dir: 'P' patogenico, 'B' benigno; def: forza predefinita ACMG 2015 */
+const CRITERIA = [
+  { code: 'PVS1', dir: 'P', def: 'very_strong', text: 'Variante null (nonsenso, frameshift, sito di splicing canonico, perdita del codone di inizio, delezione di uno o più esoni) in un gene in cui la perdita di funzione è un meccanismo noto di malattia.', hint: 'Per modulare la forza usa il decision tree ClinGen SVI per PVS1.' },
+  { code: 'PS1', dir: 'P', def: 'strong', text: 'Stessa sostituzione amminoacidica di una variante già stabilita come patogenica, con diversa alterazione nucleotidica.' },
+  { code: 'PS2', dir: 'P', def: 'strong', text: 'De novo (paternità e maternità confermate) in un paziente con la malattia e senza storia familiare.' },
+  { code: 'PS3', dir: 'P', def: 'strong', text: 'Studi funzionali in vitro o in vivo ben validati che mostrano un effetto deleterio.' },
+  { code: 'PS4', dir: 'P', def: 'strong', text: 'Prevalenza nei soggetti affetti significativamente aumentata rispetto ai controlli.' },
+  { code: 'PM1', dir: 'P', def: 'moderate', text: 'In un hotspot mutazionale e/o dominio funzionale critico privo di varianti benigne.' },
+  { code: 'PM2', dir: 'P', def: 'moderate', text: 'Assente (o a frequenza estremamente bassa) nei database di popolazione; per le forme recessive, assente in omozigosi.', hint: 'ClinGen SVI (2020) raccomanda di applicarlo a livello Supporting.' },
+  { code: 'PM3', dir: 'P', def: 'moderate', text: 'Per le malattie recessive, rilevata in trans con una variante patogenica.' },
+  { code: 'PM4', dir: 'P', def: 'moderate', text: 'Variazione di lunghezza proteica (delezione/inserzione in-frame, stop-loss) in regione non ripetuta.' },
+  { code: 'PM5', dir: 'P', def: 'moderate', text: 'Missense in un residuo dove un diverso missense è già stabilito come patogenico.' },
+  { code: 'PM6', dir: 'P', def: 'moderate', text: 'Presunta de novo, senza conferma di paternità e maternità.' },
+  { code: 'PP1', dir: 'P', def: 'supporting', text: 'Cosegregazione con la malattia in più familiari affetti, in un gene noto per la malattia.' },
+  { code: 'PP2', dir: 'P', def: 'supporting', text: 'Missense in un gene con bassa frequenza di missense benigni e in cui i missense sono un meccanismo comune di malattia.' },
+  { code: 'PP3', dir: 'P', def: 'supporting', text: 'Predittori in silico concordi su un effetto deleterio (funzione, conservazione, splicing).', hint: 'Con predittori calibrati (es. REVEL, Pejaver 2022) la forza può arrivare a Moderate/Strong.' },
+  { code: 'PP4', dir: 'P', def: 'supporting', text: 'Fenotipo o storia familiare altamente specifici per una malattia con una singola eziologia genetica.' },
+  { code: 'PP5', dir: 'P', def: 'supporting', text: 'Fonte affidabile segnala la variante come patogenica, senza evidenze accessibili per una valutazione indipendente.', deprecated: true, hint: 'Criterio ritirato da ClinGen SVI (2018): sconsigliato.' },
+
+  { code: 'BA1', dir: 'B', def: 'stand_alone', text: 'Frequenza allelica superiore al 5% nei database di popolazione.' },
+  { code: 'BS1', dir: 'B', def: 'strong', text: 'Frequenza allelica maggiore di quella attesa per la malattia.' },
+  { code: 'BS2', dir: 'B', def: 'strong', text: 'Osservata in adulti sani in omozigosi (recessive), eterozigosi (dominanti) o emizigosi (X-linked), con penetranza completa attesa all\'età adulta.' },
+  { code: 'BS3', dir: 'B', def: 'strong', text: 'Studi funzionali ben validati che non mostrano effetto deleterio.' },
+  { code: 'BS4', dir: 'B', def: 'strong', text: 'Mancata cosegregazione nei familiari affetti.' },
+  { code: 'BP1', dir: 'B', def: 'supporting', text: 'Missense in un gene in cui la malattia è causata solo da varianti troncanti.' },
+  { code: 'BP2', dir: 'B', def: 'supporting', text: 'Osservata in trans con una variante patogenica in una malattia dominante a penetranza completa, o in cis con una variante patogenica.' },
+  { code: 'BP3', dir: 'B', def: 'supporting', text: 'Delezione/inserzione in-frame in una regione ripetuta senza funzione nota.' },
+  { code: 'BP4', dir: 'B', def: 'supporting', text: 'Predittori in silico concordi su assenza di impatto su gene o prodotto genico.', hint: 'Con predittori calibrati (es. REVEL, Pejaver 2022) la forza può arrivare a Moderate/Strong.' },
+  { code: 'BP5', dir: 'B', def: 'supporting', text: 'Variante trovata in un caso con una causa molecolare alternativa già definita.' },
+  { code: 'BP6', dir: 'B', def: 'supporting', text: 'Fonte affidabile segnala la variante come benigna, senza evidenze accessibili per una valutazione indipendente.', deprecated: true, hint: 'Criterio ritirato da ClinGen SVI (2018): sconsigliato.' },
+  { code: 'BP7', dir: 'B', def: 'supporting', text: 'Variante sinonima senza impatto previsto sullo splicing e in nucleotide non conservato.' }
+];
+
+/* ───────────── LOGICA (pura, testabile) ───────────── */
+
+/* applied: [{code, dir, strength}] */
+function countStrengths(applied) {
+  const c = { vs: 0, s: 0, m: 0, p: 0, ba: 0, bs: 0, bp: 0 };
+  applied.forEach(a => {
+    if (a.dir === 'P') {
+      if (a.strength === 'very_strong') c.vs++;
+      else if (a.strength === 'strong') c.s++;
+      else if (a.strength === 'moderate') c.m++;
+      else if (a.strength === 'supporting') c.p++;
+    } else {
+      if (a.strength === 'stand_alone') c.ba++;
+      else if (a.strength === 'strong') c.bs++;
+      else if (a.strength === 'supporting') c.bp++;
+    }
+  });
+  return c;
+}
+
+/* Regole combinatorie ACMG/AMP 2015, Table 5 */
+function classifyCombinatorial(c) {
+  const isP =
+    (c.vs >= 1 && (c.s >= 1 || c.m >= 2 || (c.m >= 1 && c.p >= 1) || c.p >= 2)) ||
+    c.s >= 2 ||
+    (c.s >= 1 && (c.m >= 3 || (c.m >= 2 && c.p >= 2) || (c.m >= 1 && c.p >= 4)));
+  const isLP =
+    (c.vs >= 1 && c.m >= 1) ||
+    (c.s >= 1 && c.m >= 1) ||
+    (c.s >= 1 && c.p >= 2) ||
+    c.m >= 3 ||
+    (c.m >= 2 && c.p >= 2) ||
+    (c.m >= 1 && c.p >= 4);
+  const isB = c.ba >= 1 || c.bs >= 2;
+  const isLB = (c.bs >= 1 && c.bp >= 1) || c.bp >= 2;
+
+  const pathogenic = isP || isLP;
+  const benign = isB || isLB;
+  if (pathogenic && benign) return { cls: 'VUS', conflict: true };
+  if (isP) return { cls: 'P', conflict: false };
+  if (isLP) return { cls: 'LP', conflict: false };
+  if (isB) return { cls: 'B', conflict: false };
+  if (isLB) return { cls: 'LB', conflict: false };
+  return { cls: 'VUS', conflict: false };
+}
+
+/* Sistema a punti (Tavtigian 2018/2020): P ≥10, LP 6–9, VUS 0–5, LB −1…−6, B ≤ −7 */
+function pointsTotal(applied) {
+  return applied.reduce((sum, a) => sum + (a.dir === 'P' ? PTS_P[a.strength] : PTS_B[a.strength]), 0);
+}
+function classifyPoints(t) {
+  if (t >= 10) return 'P';
+  if (t >= 6) return 'LP';
+  if (t >= 0) return 'VUS';
+  if (t >= -6) return 'LB';
+  return 'B';
+}
+
+/* Sottoclassi VUS (solo uso interno).
+   Fonte: Genet Med 2022 – warm/hot = 4–5 punti; cold/cool/tepid = 0–3 (tepid = 3).
+   La suddivisione hot=5 / warm=4 e cool=2 / cold=0–1 è una lettura da verificare. */
+function vusSubclass(t) {
+  if (t < 0 || t > 5) return null;
+  if (t === 5) return 'hot';
+  if (t === 4) return 'warm';
+  if (t === 3) return 'tepid';
+  if (t === 2) return 'cool';
+  return 'cold';
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = { CRITERIA, countStrengths, classifyCombinatorial, pointsTotal, classifyPoints, vusSubclass };
+}
+
+/* ───────────── INTERFACCIA ───────────── */
+
+if (typeof document !== 'undefined') {
+  const state = {};   // code → { on, strength, note }
+  CRITERIA.forEach(c => { state[c.code] = { on: false, strength: c.def, note: '' }; });
+
+  const $ = id => document.getElementById(id);
+
+  function groupTitle(dir, def) {
+    if (dir === 'P') {
+      return { very_strong: 'Very Strong', strong: 'Strong', moderate: 'Moderate', supporting: 'Supporting' }[def];
+    }
+    return { stand_alone: 'Stand-alone', strong: 'Strong', supporting: 'Supporting' }[def];
+  }
+
+  function buildList(dir, container) {
+    let lastDef = null;
+    CRITERIA.filter(c => c.dir === dir).forEach(c => {
+      if (c.def !== lastDef) {
+        const h = document.createElement('div');
+        h.className = 'crit-group';
+        h.textContent = groupTitle(dir, c.def) + ' (predefinito)';
+        container.appendChild(h);
+        lastDef = c.def;
+      }
+      const row = document.createElement('div');
+      row.className = 'crit' + (c.deprecated ? ' crit-deprecated' : '');
+      row.dataset.code = c.code;
+
+      const top = document.createElement('div');
+      top.className = 'crit-top';
+
+      const label = document.createElement('label');
+      label.className = 'crit-check';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = 'cb-' + c.code;
+      cb.addEventListener('change', () => { state[c.code].on = cb.checked; row.classList.toggle('on', cb.checked); update(); });
+      const code = document.createElement('span');
+      code.className = 'crit-code ' + (dir === 'P' ? 'code-p' : 'code-b');
+      code.textContent = c.code;
+      label.appendChild(cb);
+      label.appendChild(code);
+
+      const sel = document.createElement('select');
+      sel.className = 'crit-strength';
+      sel.setAttribute('aria-label', 'Forza applicata ' + c.code);
+      (dir === 'P' ? OPTS_P : OPTS_B).forEach(k => {
+        const o = document.createElement('option');
+        o.value = k;
+        o.textContent = STRENGTH_LABEL[k] + (k === c.def ? ' •' : '');
+        if (k === c.def) o.selected = true;
+        sel.appendChild(o);
+      });
+      sel.addEventListener('change', () => { state[c.code].strength = sel.value; update(); });
+
+      top.appendChild(label);
+      top.appendChild(sel);
+
+      const txt = document.createElement('div');
+      txt.className = 'crit-text';
+      txt.textContent = c.text;
+
+      row.appendChild(top);
+      row.appendChild(txt);
+
+      if (c.hint) {
+        const hint = document.createElement('div');
+        hint.className = 'crit-hint';
+        hint.textContent = 'ℹ ' + c.hint;
+        row.appendChild(hint);
+      }
+
+      const note = document.createElement('input');
+      note.type = 'text';
+      note.className = 'crit-note';
+      note.placeholder = 'Giustificazione / PMID (facoltativo)';
+      note.addEventListener('input', () => { state[c.code].note = note.value; });
+      row.appendChild(note);
+
+      container.appendChild(row);
+    });
+  }
+
+  function getApplied() {
+    return CRITERIA.filter(c => state[c.code].on).map(c => ({
+      code: c.code, dir: c.dir, def: c.def, strength: state[c.code].strength, note: state[c.code].note
+    }));
+  }
+
+  function setBadge(el, cls) {
+    el.className = 'class-badge cls-' + cls;
+    el.textContent = CLASS_LABEL[cls] + ' (' + cls + ')';
+  }
+
+  function currentResult() {
+    const applied = getApplied();
+    const counts = countStrengths(applied);
+    const comb = classifyCombinatorial(counts);
+    const total = pointsTotal(applied);
+    const pts = classifyPoints(total);
+    return { applied, counts, comb, total, pts, sub: pts === 'VUS' ? vusSubclass(total) : null };
+  }
+
+  function update() {
+    const r = currentResult();
+    const has = r.applied.length > 0;
+
+    $('result-empty').classList.toggle('hidden', has);
+    $('result-body').classList.toggle('hidden', !has);
+    if (!has) return;
+
+    setBadge($('badge-comb'), r.comb.cls);
+    setBadge($('badge-pts'), r.pts);
+    $('points-total').textContent = (r.total > 0 ? '+' : '') + r.total;
+
+    /* scala punti */
+    const lo = -9, hi = 12, cells = hi - lo + 1;
+    const clamped = Math.max(lo, Math.min(hi, r.total));
+    $('scale-marker').style.left = ((clamped - lo + 0.5) / cells * 100) + '%';
+
+    /* sottoclasse VUS / distanza dalla LP */
+    const sub = $('vus-sub');
+    if (r.pts === 'VUS') {
+      const dist = 6 - r.total;
+      sub.classList.remove('hidden');
+      sub.textContent = 'VUS ' + r.sub + ' · ' + dist + (dist === 1 ? ' punto' : ' punti') + ' dalla soglia Likely Pathogenic';
+    } else {
+      sub.classList.add('hidden');
+    }
+
+    /* avvisi */
+    const alerts = $('alerts');
+    alerts.textContent = '';
+    const addAlert = (kind, msg) => {
+      const d = document.createElement('div');
+      d.className = 'alert alert-' + kind;
+      d.textContent = msg;
+      alerts.appendChild(d);
+    };
+    if (r.comb.conflict) addAlert('warn', 'Criteri patogenici e benigni in conflitto: con le regole combinatorie la variante resta VUS. Rivaluta le evidenze.');
+    if (r.comb.cls !== r.pts) addAlert('info', 'I due metodi non concordano (' + r.comb.cls + ' vs ' + r.pts + '). Succede ai margini delle soglie: documenta quale metodo applichi e perché.');
+    const dep = r.applied.filter(a => CRITERIA.find(c => c.code === a.code).deprecated);
+    if (dep.length) addAlert('warn', 'Hai applicato criteri ritirati da ClinGen SVI: ' + dep.map(d => d.code).join(', ') + '.');
+
+    /* riepilogo evidenze */
+    const list = $('evidence-list');
+    list.textContent = '';
+    r.applied.forEach(a => {
+      const li = document.createElement('li');
+      const pts = a.dir === 'P' ? PTS_P[a.strength] : PTS_B[a.strength];
+      const strong = document.createElement('strong');
+      strong.textContent = a.code;
+      li.appendChild(strong);
+      li.appendChild(document.createTextNode(' · ' + STRENGTH_LABEL[a.strength] + (a.strength !== a.def ? ' (modulato)' : '') + ' · ' + (pts > 0 ? '+' : '') + pts));
+      if (a.note) {
+        const n = document.createElement('div');
+        n.className = 'ev-note';
+        n.textContent = a.note;
+        li.appendChild(n);
+      }
+      list.appendChild(li);
+    });
+  }
+
+  function summaryText() {
+    const r = currentResult();
+    const gene = $('v-gene').value.trim();
+    const variant = $('v-variant').value.trim();
+    const lines = [];
+    lines.push('Variante: ' + ([gene, variant].filter(Boolean).join(' ') || '—'));
+    lines.push('Classificazione (regole combinatorie ACMG/AMP 2015): ' + r.comb.cls + (r.comb.conflict ? ' (criteri in conflitto)' : ''));
+    lines.push('Classificazione (sistema a punti): ' + r.pts + ' (' + r.total + ' punti)');
+    if (r.sub) lines.push('Sottoclasse VUS (uso interno): ' + r.sub);
+    lines.push('Criteri applicati:');
+    r.applied.forEach(a => {
+      lines.push('  ' + a.code + ' – ' + a.strength + (a.note ? ' – ' + a.note : ''));
+    });
+    return lines.join('\n');
+  }
+
+  function csvEscape(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }
+
+  function exportCSV() {
+    const r = currentResult();
+    if (!r.applied.length) { flash('Seleziona almeno un criterio.'); return; }
+    const gene = $('v-gene').value.trim();
+    const variant = $('v-variant').value.trim();
+    const rows = [['gene', 'variant', 'code', 'applied_strength', 'points', 'justification']];
+    r.applied.forEach(a => {
+      rows.push([gene, variant, a.code, a.strength, a.dir === 'P' ? PTS_P[a.strength] : PTS_B[a.strength], a.note]);
+    });
+    rows.push([]);
+    rows.push(['final_class_combinatorial', r.comb.cls]);
+    rows.push(['final_class_points', r.pts, 'total_points', r.total]);
+    if (r.sub) rows.push(['vus_subclass', r.sub]);
+    const csv = rows.map(row => row.map(csvEscape).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'acmg_' + ((gene || 'variante') + '_' + (variant || '')).replace(/[^\w.-]+/g, '_') + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  let flashTimer;
+  function flash(msg) {
+    const f = $('flash');
+    f.textContent = msg;
+    f.classList.add('show');
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => f.classList.remove('show'), 2200);
+  }
+
+  async function copySummary() {
+    const r = currentResult();
+    if (!r.applied.length) { flash('Seleziona almeno un criterio.'); return; }
+    const text = summaryText();
+    try {
+      await navigator.clipboard.writeText(text);
+      flash('Riepilogo copiato');
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); flash('Riepilogo copiato'); } catch (e2) { flash('Copia non riuscita'); }
+      ta.remove();
+    }
+  }
+
+  function resetAll() {
+    CRITERIA.forEach(c => { state[c.code] = { on: false, strength: c.def, note: '' }; });
+    document.querySelectorAll('.crit').forEach(row => {
+      const code = row.dataset.code;
+      const c = CRITERIA.find(x => x.code === code);
+      row.classList.remove('on');
+      row.querySelector('input[type=checkbox]').checked = false;
+      row.querySelector('select').value = c.def;
+      row.querySelector('.crit-note').value = '';
+    });
+    update();
+  }
+
+  function fillExample(name) {
+    resetAll();
+    const ex = {
+      lof: { gene: 'ABCB11', variant: 'esempio: nonsenso in omozigosi', set: [['PVS1', 'very_strong'], ['PM2', 'supporting'], ['PM3', 'moderate']] },
+      missense: { gene: 'ATP8B1', variant: 'esempio: missense raro', set: [['PM2', 'supporting'], ['PP3', 'supporting'], ['PM1', 'moderate']] },
+      common: { gene: 'GENE', variant: 'esempio: variante frequente', set: [['BA1', 'stand_alone']] }
+    }[name];
+    $('v-gene').value = ex.gene;
+    $('v-variant').value = ex.variant;
+    ex.set.forEach(([code, strength]) => {
+      state[code].on = true;
+      state[code].strength = strength;
+      const row = document.querySelector('.crit[data-code="' + code + '"]');
+      row.classList.add('on');
+      row.querySelector('input[type=checkbox]').checked = true;
+      row.querySelector('select').value = strength;
+    });
+    update();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    buildList('P', $('crit-path'));
+    buildList('B', $('crit-ben'));
+    $('btn-reset').addEventListener('click', resetAll);
+    $('btn-copy').addEventListener('click', copySummary);
+    $('btn-csv').addEventListener('click', exportCSV);
+    document.querySelectorAll('[data-example]').forEach(b => b.addEventListener('click', () => fillExample(b.dataset.example)));
+    update();
+  });
+}
+
+</script>
+</body>
+
+</html>
